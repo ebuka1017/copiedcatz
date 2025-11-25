@@ -4,12 +4,21 @@ import React from 'react';
 import { useTemplateStore, useTemplateKeyboardShortcuts } from '@/lib/stores/template-store';
 import { Undo2, Redo2, Save, Wand2 } from 'lucide-react';
 import buttonStyles from '@/components/ui/glass-button.module.css';
+import { useShallow } from 'zustand/react/shallow';
 
 export function HistoryToolbar() {
     const {
         undo, redo, canUndo, canRedo,
         saveTemplate, generateVariation, isGenerating
-    } = useTemplateStore();
+    } = useTemplateStore(useShallow(state => ({
+        undo: state.undo,
+        redo: state.redo,
+        canUndo: state.canUndo,
+        canRedo: state.canRedo,
+        saveTemplate: state.saveTemplate,
+        generateVariation: state.generateVariation,
+        isGenerating: state.isGenerating
+    })));
 
     // Enable keyboard shortcuts
     useTemplateKeyboardShortcuts();

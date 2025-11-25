@@ -5,12 +5,15 @@ import { useTemplateStore } from '@/lib/stores/template-store';
 import { ArrowLeft, Download, Save, Undo, Redo } from 'lucide-react';
 import Link from 'next/link';
 
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
+
 interface EditorLayoutProps {
     children: React.ReactNode;
 }
 
 export function EditorLayout({ children }: EditorLayoutProps) {
     const { undo, redo, canUndo, canRedo, saveTemplate, isGenerating } = useTemplateStore();
+    useUnsavedChanges();
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">

@@ -16,7 +16,8 @@ const CATEGORIES: { key: keyof StructuredPrompt; label: string }[] = [
 ];
 
 export function PromptControls() {
-    const { template, updatePrompt } = useTemplateStore();
+    const template = useTemplateStore(state => state.template);
+    const updatePrompt = useTemplateStore(state => state.updatePrompt);
     const [expandedCategory, setExpandedCategory] = useState<string | null>('scene');
 
     if (!template) return null;
