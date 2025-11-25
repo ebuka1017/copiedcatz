@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ES2020",
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ESNext"
+        ],
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": ".",
+        "rootDir": ".",
+        "types": [
+            "chrome"
+        ]
+    },
+    "include": [
+        "*.ts",
+        "*.tsx"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
