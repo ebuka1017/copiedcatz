@@ -1,0 +1,21 @@
+const requiredEnvVars = [
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'JWT_SECRET',
+    'PUSHER_APP_ID',
+    'PUSHER_KEY',
+    'PUSHER_SECRET',
+    'NEXT_PUBLIC_PUSHER_CLUSTER',
+    // 'BRIA_API_KEY', // Temporarily optional until we integrate real Bria
+] as const;
+
+export function validateEnv() {
+    const missing = requiredEnvVars.filter((key) => !process.env[key]);
+
+    if (missing.length > 0) {
+        throw new Error(
+            `Missing required environment variables:\n${missing.join('\n')}\n\nPlease check your .env.local file.`
+        );
+    }
+}

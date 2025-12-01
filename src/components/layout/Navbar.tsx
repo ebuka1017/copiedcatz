@@ -1,24 +1,54 @@
+'use client';
+
 import Link from "next/link";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { Home01Icon, ContactIcon, Login03Icon, UserAdd01Icon, DashboardSquare01Icon, Store01Icon } from "@hugeicons/react";
 
 export function Navbar() {
+    const { user, loading } = useAuth();
+
     return (
         <nav className="w-full p-6 flex justify-between items-center z-10 absolute top-0 left-0 right-0">
-            <Link href="/" className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+            <Link href="/" className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-400 flex items-center gap-2">
                 CopiedCatz
             </Link>
             <div className="flex items-center gap-6">
                 <div className="hidden md:flex gap-6 text-sm font-medium text-slate-300">
-                    <Link href="/#use-cases" className="hover:text-white transition-colors">Use Cases</Link>
-                    <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
-                </div>
-                <div className="flex gap-4">
-                    <Link href="/login" className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">
-                        Login
+                    <Link href="/marketplace" className="hover:text-white transition-colors flex items-center gap-1">
+                        <Store01Icon size={16} />
+                        Marketplace
                     </Link>
-                    <Link href="/signup" className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/10 rounded-full backdrop-blur-md transition-all">
-                        Sign Up
+                    <Link href="/#use-cases" className="hover:text-white transition-colors flex items-center gap-1">
+                        <Home01Icon size={16} />
+                        Use Cases
+                    </Link>
+                    <Link href="/contact" className="hover:text-white transition-colors flex items-center gap-1">
+                        <ContactIcon size={16} />
+                        Contact
                     </Link>
                 </div>
+
+                {!loading && (
+                    <div className="flex gap-4">
+                        {user ? (
+                            <Link href="/dashboard" className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/10 rounded-full backdrop-blur-md transition-all flex items-center gap-2">
+                                <DashboardSquare01Icon size={16} />
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                                    <Login03Icon size={16} />
+                                    Login
+                                </Link>
+                                <Link href="/signup" className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/10 rounded-full backdrop-blur-md transition-all flex items-center gap-2">
+                                    <UserAdd01Icon size={16} />
+                                    Sign Up
+                                </Link>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
         </nav>
     );

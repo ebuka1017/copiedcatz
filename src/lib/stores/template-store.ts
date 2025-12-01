@@ -56,6 +56,7 @@ interface TemplateState {
 
     // Actions
     setTemplate: (template: Template) => void;
+    setStructuredPrompt: (prompt: StructuredPrompt) => void;
     updatePrompt: (
         category: keyof StructuredPrompt,
         attribute: string | number, // Updated to allow array indices or specific fields
@@ -88,6 +89,10 @@ interface TemplateState {
 
     // Utility
     reset: () => void;
+
+    // Internal
+    _pushHistory: () => void;
+    _debouncedPushHistory: any; // Typed as any to avoid complex Lodash types in interface
 }
 
 // ============================================================================
@@ -111,6 +116,46 @@ export const useTemplateStore = create<TemplateState>()(
                 immer((set, get) => ({
                     ...initialState,
 
+                    // Initialize debounced function
+                    _debouncedPushHistory: debounce(() => get()._pushHistory(), 1000),
+
+                    // ==================================================================
+                    // CORE ACTIONS
+                    // ==================================================================
+
+                    // ==================================================================
+                    // HISTORY ACTIONS (Internal)
+                    // ==================================================================
+
+                    _pushHistory: () => {
+                        set((state) => {
+                            if (!state.template) return;
+
+                            // Check if current state is different from last history state to avoid duplicates
+                            const lastHistory = state.history[state.historyIndex];
+                            const currentPrompt = state.template.structured_prompt;
+
+                            // Simple JSON comparison (could be optimized)
+                            if (JSON.stringify(lastHistory?.prompt) === JSON.stringify(currentPrompt)) {
+                                return;
+                            }
+
+                            const newHistory = state.history.slice(0, state.historyIndex + 1);
+                            newHistory.push({
+                                prompt: structuredClone(currentPrompt),
+                                timestamp: Date.now()
+                            });
+
+                            if (newHistory.length > state.maxHistoryLength) {
+                                newHistory.shift();
+                            } else {
+                                state.historyIndex++;
+                            }
+
+                            state.history = newHistory;
+                        });
+                    },
+
                     // ==================================================================
                     // CORE ACTIONS
                     // ==================================================================
@@ -125,61 +170,39 @@ export const useTemplateStore = create<TemplateState>()(
                             }];
                             state.historyIndex = 0;
                         });
+                        // Cancel any pending history pushes from previous template
+                        get()._debouncedPushHistory?.cancel();
+                    },
+
+                    setStructuredPrompt: (prompt) => {
+                        set((state) => {
+                            if (!state.template) return;
+                            state.template.structured_prompt = prompt;
+                            state.template.updated_at = new Date();
+                        });
+                        get()._debouncedPushHistory();
                     },
 
                     updatePrompt: (category, attribute, value) => {
                         set((state) => {
                             if (!state.template) return;
-
-                            // Immer handles immutability automatically
                             const categoryObj = state.template.structured_prompt[category] as any;
                             categoryObj[attribute] = value;
                             state.template.updated_at = new Date();
-
-                            // Add to history
-                            const newHistory = state.history.slice(0, state.historyIndex + 1);
-                            newHistory.push({
-                                prompt: structuredClone(state.template.structured_prompt),
-                                timestamp: Date.now()
-                            });
-
-                            // Circular buffer: keep only last 50 states
-                            if (newHistory.length > state.maxHistoryLength) {
-                                newHistory.shift(); // Remove oldest
-                            } else {
-                                state.historyIndex++;
-                            }
-
-                            state.history = newHistory;
                         });
+                        get()._debouncedPushHistory();
                     },
 
                     batchUpdatePrompt: (updates) => {
                         set((state) => {
                             if (!state.template) return;
-
-                            // Apply all updates in single transaction
                             updates.forEach(({ category, attribute, value }) => {
                                 const categoryObj = state.template!.structured_prompt[category] as any;
                                 categoryObj[attribute] = value;
                             });
                             state.template.updated_at = new Date();
-
-                            // Single history entry for batch
-                            const newHistory = state.history.slice(0, state.historyIndex + 1);
-                            newHistory.push({
-                                prompt: structuredClone(state.template.structured_prompt),
-                                timestamp: Date.now()
-                            });
-
-                            if (newHistory.length > state.maxHistoryLength) {
-                                newHistory.shift();
-                            } else {
-                                state.historyIndex++;
-                            }
-
-                            state.history = newHistory;
                         });
+                        get()._debouncedPushHistory();
                     },
 
                     // ==================================================================
@@ -249,6 +272,7 @@ export const useTemplateStore = create<TemplateState>()(
                     // ==================================================================
 
                     undo: () => {
+                        get()._debouncedPushHistory?.cancel();
                         const { history, historyIndex } = get();
 
                         if (historyIndex > 0) {
@@ -266,6 +290,7 @@ export const useTemplateStore = create<TemplateState>()(
                     },
 
                     redo: () => {
+                        get()._debouncedPushHistory?.cancel();
                         const { history, historyIndex } = get();
 
                         if (historyIndex < history.length - 1) {

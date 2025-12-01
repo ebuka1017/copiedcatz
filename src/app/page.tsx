@@ -6,7 +6,11 @@ import Image from "next/image";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorDisplay } from "@/components/ui/error-display";
+import { UsageStats } from "@/components/dashboard/usage-stats";
 import { Plus, Edit, Trash2, Loader2, AlertCircle } from "lucide-react";
+import { Add01Icon } from "@hugeicons/react";
 import { motion } from "framer-motion";
 
 interface Template {
@@ -81,7 +85,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 to-slate-900 text-white">
       <Navbar />
 
       <main className="flex-grow pt-32 pb-16 px-6">
@@ -100,28 +104,25 @@ export default function Dashboard() {
             </Link>
           </div>
 
+          <UsageStats />
+
           {loading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
             </div>
           ) : error ? (
-            <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400">
-              <AlertCircle className="w-6 h-6" />
-              {error}
-            </div>
+            <ErrorDisplay
+              message={error || 'Unknown error'}
+              onRetry={fetchTemplates}
+            />
           ) : templates.length === 0 ? (
-            <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Plus className="w-8 h-8 text-slate-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">No templates yet</h3>
-              <p className="text-slate-400 mb-6">Create your first template to start generating variations.</p>
-              <Link href="/editor/new">
-                <button className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg font-bold transition-colors">
-                  Create Template
-                </button>
-              </Link>
-            </div>
+            <EmptyState
+              icon={Add01Icon}
+              title="No templates yet"
+              description="Create your first template to start generating variations."
+              actionLabel="Create Template"
+              actionHref="/editor/new"
+            />
           ) : (
             <motion.div
               className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -141,7 +142,7 @@ export default function Dashboard() {
                       />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Link href={`/editor/${template.id}`}>
-                          <button className="p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors" title="Edit">
+                          <button className="p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors" title="Edit" aria-label={`Edit ${template.name}`}>
                             <Edit className="w-5 h-5" />
                           </button>
                         </Link>
@@ -149,6 +150,7 @@ export default function Dashboard() {
                           onClick={() => handleDelete(template.id)}
                           className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg backdrop-blur-sm transition-colors"
                           title="Delete"
+                          aria-label={`Delete ${template.name}`}
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>

@@ -3,7 +3,7 @@
  * Handles secure upload to Vercel Blob via signed URLs
  */
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const APP_URL = chrome.runtime.getManifest().homepage_url || 'http://localhost:3000';
 
 export interface UploadResult {
     blob_id: string;
