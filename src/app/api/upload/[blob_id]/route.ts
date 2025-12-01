@@ -54,11 +54,8 @@ export async function GET(
         }
 
         // Return public URL
-        // If using Vercel Blob, the URL is usually returned by the put operation or constructed
-        // Here we assume a standard Vercel Blob URL structure or use the one stored if we had stored it
-        // For now, constructing it based on filepath as per PRD
-        const baseUrl = process.env.BLOB_BASE_URL || 'https://blob.copiedcatz.com';
-        const public_url = `${baseUrl}/${upload.filepath}`;
+        // Use Supabase public URL
+        const public_url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${upload.filepath}`;
 
         return NextResponse.json({
             blob_id,

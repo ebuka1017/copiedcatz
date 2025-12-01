@@ -62,8 +62,7 @@ export async function POST(req: Request) {
 
         // Create Template
         // Construct image URL from blob path
-        // Note: Ensure this domain matches your Vercel Blob setup
-        const imageUrl = `https://blob.copiedcatz.com/${job.upload.filepath}`;
+        const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${job.upload.filepath}`;
 
         const template = await db.template.create({
             data: {

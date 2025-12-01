@@ -61,7 +61,7 @@ export async function POST(req: Request) {
         });
 
         // Call Bria API with webhook callback
-        const imageUrl = `https://blob.copiedcatz.com/${upload.filepath}`;
+        const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${upload.filepath}`;
         const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/bria-callback`;
 
         // Note: In a real scenario, we would call the Bria API here.
