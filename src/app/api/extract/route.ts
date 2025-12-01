@@ -68,7 +68,9 @@ export async function POST(req: Request) {
         // For this implementation, we assume the call is made.
         // If running locally without Bria API key, this might fail or need mocking.
 
-        if (process.env.BRIA_API_KEY) {
+        const apiKey = process.env.BRIA_API_TOKEN || process.env.BRIA_API_KEY;
+
+        if (apiKey) {
             const maxRetries = 3;
             let attempt = 0;
             let success = false;
@@ -78,7 +80,7 @@ export async function POST(req: Request) {
                     const briaResponse = await fetch('https://api.bria.ai/v1/inspire/extract', {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${process.env.BRIA_API_KEY}`,
+                            'Authorization': `Bearer ${apiKey}`,
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({

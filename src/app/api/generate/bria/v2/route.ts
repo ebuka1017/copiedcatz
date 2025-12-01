@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     try {
         const response = await fetch(statusUrl, {
             headers: {
-                'api_token': process.env.BRIA_API_TOKEN!,
+                'api_token': process.env.BRIA_API_TOKEN || process.env.BRIA_API_KEY!,
             },
         });
 

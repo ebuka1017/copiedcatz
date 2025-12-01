@@ -1,10 +1,10 @@
 import { GenerateImageRequest, GenerateImageResponse, GenerateStructuredPromptRequest, GenerateStructuredPromptResponse } from './types';
 
 const BRIA_API_URL = 'https://engine.prod.bria-api.com/v2';
-const BRIA_API_TOKEN = process.env.BRIA_API_TOKEN;
+const BRIA_API_TOKEN = process.env.BRIA_API_TOKEN || process.env.BRIA_API_KEY;
 
 if (!BRIA_API_TOKEN) {
-    console.warn('BRIA_API_TOKEN is not defined. Bria API calls will fail.');
+    console.warn('BRIA_API_TOKEN (or BRIA_API_KEY) is not defined. Bria API calls will fail.');
 }
 
 async function pollStatus(statusUrl: string): Promise<any> {
