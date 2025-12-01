@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server';
-import Pusher from 'pusher';
+import { pusher } from '@/lib/pusher';
 import { verifyAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
-
-const pusher = new Pusher({
-    appId: process.env.PUSHER_APP_ID!,
-    key: process.env.PUSHER_KEY!,
-    secret: process.env.PUSHER_SECRET!,
-    cluster: process.env.PUSHER_CLUSTER!,
-    useTLS: true,
-});
 
 /**
  * Authenticate user for private Pusher channels

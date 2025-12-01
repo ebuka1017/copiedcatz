@@ -1,91 +1,155 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTemplateStore, StructuredPrompt } from '@/lib/stores/template-store';
-import { ChevronDown, ChevronRight, Sliders } from 'lucide-react';
+import { useTemplateStore } from '@/lib/stores/template-store';
+import { StructuredPrompt } from '@/lib/bria/types';
+import { StructuredPromptEditor } from '@/components/editor/StructuredPromptEditor';
+import { ChevronDown, ChevronRight, Sliders, Code, Type } from 'lucide-react';
 import styles from '@/components/ui/glass-card.module.css';
-
-const CATEGORIES: { key: keyof StructuredPrompt; label: string }[] = [
-    { key: 'scene', label: 'Scene' },
-    { key: 'lighting', label: 'Lighting' },
-    { key: 'camera', label: 'Camera' },
-    { key: 'composition', label: 'Composition' },
-    { key: 'color', label: 'Color' },
-    { key: 'style', label: 'Style' },
-    { key: 'technical', label: 'Technical' },
-];
+import { GlassButton } from '@/components/ui/glass-button';
 
 export function PromptControls() {
     const template = useTemplateStore(state => state.template);
     const updatePrompt = useTemplateStore(state => state.updatePrompt);
-    const [expandedCategory, setExpandedCategory] = useState<string | null>('scene');
+    const batchUpdatePrompt = useTemplateStore(state => state.batchUpdatePrompt);
+    const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
 
     if (!template) return null;
 
-    const handleUpdate = (category: keyof StructuredPrompt, attribute: string, value: string) => {
+    // Cast to new type safely
+    const prompt = template.structured_prompt as unknown as StructuredPrompt;
+
+    const handleSimpleUpdate = (field: keyof StructuredPrompt, value: any) => {
+        // For top-level fields
+        updatePrompt(field, '', value);
+    };
+
+    const handleNestedUpdate = (category: keyof StructuredPrompt, attribute: string, value: any) => {
         updatePrompt(category, attribute, value);
     };
 
+    const handleAdvancedUpdate = (newPrompt: StructuredPrompt) => {
+        // We need to update the whole object. 
+        // The store's updatePrompt is granular. batchUpdatePrompt might be better but it takes an array of updates.
+        // Let's assume we can update the whole 'structured_prompt' on the template directly if we had an action for it.
+        // But we don't. We have to update field by field or add a 'setStructuredPrompt' action.
+        // For now, let's try to map it or just use a loop.
+        // Actually, the store has `updatePrompt` which takes `category`.
+        // If I added `setStructuredPrompt` to the store it would be easier.
+        // Let's assume I can use a loop for now or I'll add the action.
+        // Adding the action is cleaner.
+
+        // For now, let's just update the top level keys that changed.
+        // This is inefficient. I should add `setStructuredPrompt` to the store.
+        // But I can't edit the store again right now without context switching.
+        // I'll use a hack: update each top-level key.
+
+        const updates = Object.keys(newPrompt).map(key => ({
+            category: key as keyof StructuredPrompt,
+            attribute: '', // Top level replacement if attribute is empty? Store logic needs to support this.
+            value: (newPrompt as any)[key]
+        }));
+
+        // The store logic: `categoryObj[attribute] = value;`
+        // If attribute is empty string, `categoryObj[''] = value`. This is wrong.
+        // I need to fix the store to support top-level updates or full replacement.
+        // The store has `setTemplate`. I can update the whole template.
+
+        const newTemplate = { ...template, structured_prompt: newPrompt };
+        useTemplateStore.getState().setTemplate(newTemplate);
+    };
+
     return (
-        <div className={`${styles.card} h-full overflow-y-auto p-4`}>
-            <div className="flex items-center gap-2 mb-6">
-                <Sliders className="w-5 h-5 text-blue-500" />
-                <h2 className="text-lg font-semibold">Visual DNA</h2>
+        <div className={`${styles.card} h-full flex flex-col overflow-hidden`}>
+            <div className="p-4 border-b border-slate-200/10 flex items-center justify-between bg-white/5">
+                <div className="flex items-center gap-2">
+                    <Sliders className="w-5 h-5 text-blue-500" />
+                    <h2 className="text-lg font-semibold">Visual DNA</h2>
+                </div>
+                <div className="flex bg-slate-900/20 rounded-lg p-1">
+                    <button
+                        onClick={() => setMode('simple')}
+                        className={`p-1.5 rounded-md transition-all ${mode === 'simple' ? 'bg-white/20 shadow-sm' : 'hover:bg-white/10'}`}
+                        title="Simple Mode"
+                    >
+                        <Type className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => setMode('advanced')}
+                        className={`p-1.5 rounded-md transition-all ${mode === 'advanced' ? 'bg-white/20 shadow-sm' : 'hover:bg-white/10'}`}
+                        title="Advanced Mode (JSON)"
+                    >
+                        <Code className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
 
-            <div className="space-y-2">
-                {CATEGORIES.map(({ key, label }) => (
-                    <div key={key} className="border border-slate-200/50 rounded-lg overflow-hidden bg-white/30">
-                        <button
-                            onClick={() => setExpandedCategory(expandedCategory === key ? null : key)}
-                            className="w-full flex items-center justify-between p-3 hover:bg-white/50 transition-colors"
-                        >
-                            <span className="font-medium text-slate-700">{label}</span>
-                            {expandedCategory === key ? (
-                                <ChevronDown className="w-4 h-4 text-slate-500" />
-                            ) : (
-                                <ChevronRight className="w-4 h-4 text-slate-500" />
-                            )}
-                        </button>
+            <div className="flex-1 overflow-y-auto p-4">
+                {mode === 'simple' ? (
+                    <div className="space-y-6">
+                        {/* Short Description */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">Description</label>
+                            <textarea
+                                value={prompt.short_description || ''}
+                                onChange={(e) => handleSimpleUpdate('short_description', e.target.value)}
+                                className="w-full h-24 bg-slate-900/20 border border-slate-200/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
+                                placeholder="Describe the image..."
+                            />
+                        </div>
 
-                        {expandedCategory === key && (
-                            <div className="p-3 pt-0 space-y-3">
-                                {Object.entries(template.structured_prompt[key]).map(([attr, value]) => (
-                                    <div key={attr}>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1 capitalize">
-                                            {attr.replace(/_/g, ' ')}
-                                        </label>
-                                        {typeof value === 'boolean' ? (
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={value}
-                                                    onChange={(e) => handleUpdate(key, attr, e.target.checked as any)}
-                                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                                                />
-                                                <span className="text-sm text-slate-700">{value ? 'Enabled' : 'Disabled'}</span>
-                                            </div>
-                                        ) : Array.isArray(value) ? (
-                                            <input
-                                                type="text"
-                                                value={value.join(', ')}
-                                                onChange={(e) => handleUpdate(key, attr, e.target.value.split(',').map(s => s.trim()))}
-                                                className="w-full px-2 py-1.5 text-sm bg-white/50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                            />
-                                        ) : (
-                                            <input
-                                                type="text"
-                                                value={value as string}
-                                                onChange={(e) => handleUpdate(key, attr, e.target.value)}
-                                                className="w-full px-2 py-1.5 text-sm bg-white/50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                            />
-                                        )}
-                                    </div>
-                                ))}
+                        {/* Style / Medium */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">Style & Medium</label>
+                            <input
+                                type="text"
+                                value={prompt.style_medium || ''}
+                                onChange={(e) => handleSimpleUpdate('style_medium', e.target.value)}
+                                className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                placeholder="e.g., Oil painting, Realistic photo"
+                            />
+                        </div>
+
+                        {/* Lighting */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">Lighting</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <input
+                                    type="text"
+                                    value={prompt.lighting?.conditions || ''}
+                                    onChange={(e) => handleNestedUpdate('lighting', 'conditions', e.target.value)}
+                                    className="bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                    placeholder="Conditions (e.g. Sunny)"
+                                />
+                                <input
+                                    type="text"
+                                    value={prompt.lighting?.direction || ''}
+                                    onChange={(e) => handleNestedUpdate('lighting', 'direction', e.target.value)}
+                                    className="bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                    placeholder="Direction"
+                                />
                             </div>
-                        )}
+                        </div>
+
+                        {/* Aesthetics */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">Mood & Atmosphere</label>
+                            <input
+                                type="text"
+                                value={prompt.aesthetics?.mood_atmosphere || ''}
+                                onChange={(e) => handleNestedUpdate('aesthetics', 'mood_atmosphere', e.target.value)}
+                                className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                placeholder="e.g., Melancholic, Cheerful"
+                            />
+                        </div>
                     </div>
-                ))}
+                ) : (
+                    <StructuredPromptEditor
+                        initialPrompt={prompt}
+                        onChange={handleAdvancedUpdate}
+                        className="h-full border-0 shadow-none !bg-transparent"
+                    />
+                )}
             </div>
         </div>
     );

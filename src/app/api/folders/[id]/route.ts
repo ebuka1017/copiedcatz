@@ -112,6 +112,10 @@ export async function DELETE(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        // Delete folder
+        // Schema handles cascade:
+        // - Subfolders: Deleted (onDelete: Cascade)
+        // - Templates: Preserved, folder_id set to null (onDelete: SetNull)
         await db.folder.delete({
             where: { id },
         });

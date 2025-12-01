@@ -8,49 +8,11 @@ import { useEffect, useState } from 'react';
 // TYPE DEFINITIONS
 // ============================================================================
 
-export interface StructuredPrompt {
-    scene: {
-        description: string;
-        environment: string;
-        atmosphere: string;
-    };
-    lighting: {
-        type: string;
-        direction: string;
-        intensity: string;
-        color_temperature: string;
-    };
-    camera: {
-        angle: string;
-        focal_length: string;
-        field_of_view: string;
-        depth_of_field: string;
-    };
-    composition: {
-        rule_of_thirds: boolean;
-        symmetry: string;
-        balance: string;
-        leading_lines: boolean;
-    };
-    color: {
-        palette: string[];
-        saturation: string;
-        contrast: string;
-        tone: string;
-    };
-    style: {
-        aesthetic: string;
-        mood: string;
-        genre: string;
-        period: string;
-    };
-    technical: {
-        resolution: string;
-        quality: string;
-        grain: string;
-        sharpness: string;
-    };
-}
+import { StructuredPrompt } from '@/lib/bria/types';
+
+// Legacy definition removed in favor of Bria V2
+// export interface StructuredPrompt { ... }
+
 
 export interface Variation {
     id: string;
@@ -96,7 +58,7 @@ interface TemplateState {
     setTemplate: (template: Template) => void;
     updatePrompt: (
         category: keyof StructuredPrompt,
-        attribute: string,
+        attribute: string | number, // Updated to allow array indices or specific fields
         value: any
     ) => void;
     batchUpdatePrompt: (updates: Array<{

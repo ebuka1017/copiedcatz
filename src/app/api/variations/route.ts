@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { generateImageV2 } from '@/lib/bria/client';
 
 export async function POST(req: Request) {
     try {
@@ -33,28 +34,30 @@ export async function POST(req: Request) {
         }
 
         // Call Bria AI API
-        // Mocking the call for now as we might not have the key or it's a serverless function
-        // In production:
-        /*
-        const briaResponse = await fetch('https://api.bria.ai/v1/generate', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.BRIA_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                prompt: structured_prompt, // Need to convert structured prompt to text or Bria format
-                seed: seed,
-                // ... other params
-            }),
-        });
-        const briaData = await briaResponse.json();
-        const imageUrl = briaData.image_url;
-        */
+        let imageUrl: string;
+        let generationTime = 0;
 
-        // MOCK GENERATION
-        const imageUrl = `https://picsum.photos/seed/${seed}/1024/1024`; // Placeholder
-        const generationTime = 1500; // Mock time
+        try {
+            const startTime = Date.now();
+            const result = await generateImageV2({
+                structured_prompt,
+                seed,
+                sync: true // Force sync for now, consistent with current architecture
+            });
+            generationTime = Date.now() - startTime;
+
+            if (result.result && result.result.length > 0) {
+                imageUrl = result.result[0].url;
+            } else {
+                throw new Error('No image returned from Bria');
+            }
+        } catch (briaError) {
+            console.error('Bria generation failed:', briaError);
+            return NextResponse.json(
+                { error: 'Failed to generate image with Bria' },
+                { status: 502 }
+            );
+        }
 
         // Store variation
         const variation = await db.variation.create({

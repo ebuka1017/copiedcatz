@@ -18,7 +18,7 @@ export default function EditorPage() {
     useEffect(() => {
         if (params.templateId && typeof params.templateId === 'string') {
             // In a real app, we'd load from API
-            // loadTemplate(params.templateId);
+            loadTemplate(params.templateId);
 
             // For now, if we don't have a template in store, we might redirect or show error
             // But since we just came from extraction, it might be there.

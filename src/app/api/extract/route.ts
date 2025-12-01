@@ -12,7 +12,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { blob_id } = await req.json();
+        let blob_id;
+        try {
+            const body = await req.json();
+            blob_id = body.blob_id;
+        } catch (e) {
+            return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+        }
+
+        if (!blob_id) {
+            return NextResponse.json({ error: 'Missing blob_id' }, { status: 400 });
+        }
 
         // Fetch upload
         const upload = await db.upload.findUnique({

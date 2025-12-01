@@ -1,6 +1,6 @@
 // Content script for page interaction
 
-console.log('Copiedcatz content script loaded');
+// Content script for page interaction
 
 // Listen for selection mode toggle
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

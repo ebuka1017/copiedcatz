@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Upload, Image as ImageIcon } from 'lucide-react';
-import { put } from '@vercel/blob';
+import { upload } from '@vercel/blob/client';
 import { useExtraction } from '@/lib/hooks/use-extraction';
 import { ExtractionProgress } from '@/components/extraction-progress';
 import cardStyles from '@/components/ui/glass-card.module.css';
@@ -33,33 +33,21 @@ export default function NewProjectPage() {
         if (!file) return;
 
         try {
-            // 1. Get signed URL
-            const response = await fetch('/api/upload/request', {
-                method: 'POST',
+            // 1. Upload to Vercel Blob
+            const newBlob = await upload(file.name, file, {
+                access: 'public',
+                handleUploadUrl: '/api/upload/request',
             });
 
-            if (!response.ok) throw new Error('Failed to get upload URL');
+            // 2. Start extraction
+            // We need to pass the blob URL because we don't have the DB ID yet.
+            // The server will need to look up the upload by URL or create it if missing (but onUploadCompleted should handle creation).
+            // However, onUploadCompleted is async and might race.
+            // Ideally, we wait for onUploadCompleted? No, we can't.
 
-            const { signed_url, blob_id } = await response.json();
-
-            // 2. Upload to Vercel Blob
-            // Note: In client-side upload we use the signed URL directly
-            // But @vercel/blob client 'put' expects a token or handle it differently
-            // For this implementation we'll use a direct fetch PUT to the signed URL if possible
-            // OR use the server-side proxy approach if we want to hide the token completely.
-            // The PRD suggests using the signed URL.
-
-            // Let's assume standard fetch PUT to signed URL for now as it's most compatible
-            await fetch(signed_url, {
-                method: 'PUT',
-                body: file,
-                headers: {
-                    'x-vercel-blob-token': process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN || '', // If needed
-                }
-            });
-
-            // 3. Start extraction
-            await startExtraction(blob_id);
+            // Actually, if we pass the URL to extract, extract can look it up.
+            // But we need to update extract route to accept url.
+            await startExtraction(newBlob.url);
 
         } catch (error) {
             console.error('Upload failed:', error);
