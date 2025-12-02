@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "build:extension": "tsc -p extension/tsconfig.json"
+    "lint": "next lint",
+    "build:extension": "vite build --config vite.config.extension.ts"
   },
   "dependencies": {
     "@prisma/client": "^7.0.0",

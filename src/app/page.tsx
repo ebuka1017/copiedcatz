@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/Footer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { UsageStats } from "@/components/dashboard/usage-stats";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit, Trash2, Loader2, AlertCircle } from "lucide-react";
 import { Add01Icon } from "@hugeicons/react";
 import { motion } from "framer-motion";
@@ -106,9 +107,17 @@ export default function Dashboard() {
 
           <UsageStats />
 
+          {/* // ... inside component ... */}
+
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-full flex flex-col">
+                  <Skeleton className="aspect-video mb-4 rounded-xl" />
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
             </div>
           ) : error ? (
             <ErrorDisplay

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/db';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
@@ -17,16 +17,16 @@ export async function GET() {
             totalVariations,
             creditsUsed
         ] = await Promise.all([
-            prisma.template.count({ where: { user_id: user.id } }),
-            prisma.variation.count({ where: { template: { user_id: user.id } } }),
-            prisma.usageLog.aggregate({
+            db.template.count({ where: { user_id: user.id } }),
+            db.variation.count({ where: { template: { user_id: user.id } } }),
+            db.usageLog.aggregate({
                 where: { user_id: user.id },
                 _sum: { credits_used: true }
             })
         ]);
 
         // Get recent activity
-        const recentActivity = await prisma.usageLog.findMany({
+        const recentActivity = await db.usageLog.findMany({
             where: { user_id: user.id },
             orderBy: { created_at: 'desc' },
             take: 5,

@@ -1,7 +1,20 @@
-    "host_permissions": [
-        "https://*.copiedcatz.com/*",
-        "http://localhost:3000/*"
+{
+    "manifest_version": 3,
+    "name": "Copiedcatz - Visual DNA Extractor",
+    "version": "1.0.0",
+    "description": "Capture images and extract their Visual DNA styles.",
+    "permissions": [
+        "activeTab",
+        "contextMenus",
+        "storage",
+        "scripting"
     ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
@@ -10,8 +23,10 @@
             "128": "icons/icon128.png"
         }
     },
-    "background": {
-        "service_worker": "background.js"
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
     },
     "content_scripts": [
         {
@@ -22,10 +37,5 @@
                 "content.js"
             ]
         }
-    ],
-    "icons": {
-        "16": "icons/icon16.png",
-        "48": "icons/icon48.png",
-        "128": "icons/icon128.png"
-    }
+    ]
 }
