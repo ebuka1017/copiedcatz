@@ -64,10 +64,6 @@ export async function POST(req: Request) {
         const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${upload.filepath}`;
         const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/bria-callback`;
 
-        // Note: In a real scenario, we would call the Bria API here.
-        // For this implementation, we assume the call is made.
-        // If running locally without Bria API key, this might fail or need mocking.
-
         const apiKey = process.env.BRIA_API_TOKEN || process.env.BRIA_API_KEY;
 
         if (apiKey) {

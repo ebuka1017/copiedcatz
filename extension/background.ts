@@ -34,9 +34,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.type === 'AREA_SELECTED') {
         // Handle area selection (from content script)
-        // For MVP, we'll just capture full visible tab
-        // In future, crop to selected area
-        captureAndUpload()
+        captureAndUpload(message.area)
             .then(() => {
                 sendResponse({ success: true });
             })

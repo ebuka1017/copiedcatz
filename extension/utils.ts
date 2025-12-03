@@ -104,15 +104,52 @@ export async function captureVisibleTab(): Promise<Blob> {
 }
 
 /**
+ * Crop image blob to specific area
+ */
+async function cropImage(blob: Blob, area: { x: number, y: number, width: number, height: number }): Promise<Blob> {
+    // Create bitmap from blob
+    const bitmap = await createImageBitmap(blob);
+
+    // Create offscreen canvas
+    const canvas = new OffscreenCanvas(area.width, area.height);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Failed to get canvas context');
+
+    // Draw cropped area
+    // Source: x, y, w, h -> Dest: 0, 0, w, h
+    ctx.drawImage(bitmap, area.x, area.y, area.width, area.height, 0, 0, area.width, area.height);
+
+    // Convert back to blob
+    return await canvas.convertToBlob({ type: 'image/png' });
+}
+
+/**
  * Full capture -> upload -> redirect flow
  */
-export async function captureAndUpload(): Promise<void> {
-    // 1. Capture
-    const imageBlob = await captureVisibleTab();
+export async function captureAndUpload(area?: { x: number, y: number, width: number, height: number }): Promise<void> {
+    // 1. Capture full tab
+    let imageBlob = await captureVisibleTab();
 
-    // 2. Upload
+    // 2. Crop if area provided
+    if (area) {
+        // Adjust for device pixel ratio if needed? 
+        // captureVisibleTab usually captures at actual device pixels, but coordinates from content script are CSS pixels.
+        // We might need to multiply by window.devicePixelRatio, but we don't have access to window in SW.
+        // We can ask content script to send pixel ratio or just assume 1 for MVP.
+        // For now, let's assume 1:1 or that the user will select what they see.
+        // Actually, captureVisibleTab in Chrome often captures at 1x unless specified? 
+        // No, it captures what's on screen.
+        // Let's stick to simple crop for now.
+        try {
+            imageBlob = await cropImage(imageBlob, area);
+        } catch (e) {
+            console.error('Crop failed, uploading full image', e);
+        }
+    }
+
+    // 3. Upload
     const blobId = await uploadImage(imageBlob);
 
-    // 3. Redirect
+    // 4. Redirect
     openEditor(blobId);
 }

@@ -16,7 +16,7 @@ model User {
   id                String    @id @default(uuid())
   email             String    @unique
   name              String?
-  password_hash     String
+  // password_hash removed - managed by Supabase Auth
   email_verified    Boolean   @default(false)
   
   // Subscription

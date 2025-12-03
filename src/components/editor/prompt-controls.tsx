@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import { StructuredPrompt } from '@/lib/bria/types';
 import { StructuredPromptEditor } from '@/components/editor/StructuredPromptEditor';
-import { ArrowDown01Icon, ArrowRight01Icon, Settings01Icon, CodeIcon, TextFontIcon } from '@hugeicons/react';
+import { Settings, Code, Type } from 'lucide-react';
 import styles from '@/components/ui/glass-card.module.css';
 import { GlassButton } from '@/components/ui/glass-button';
 
@@ -37,7 +37,7 @@ export function PromptControls() {
         <div className={`${styles.card} h-full flex flex-col overflow-hidden`}>
             <div className="p-4 border-b border-slate-200/10 flex items-center justify-between bg-white/5">
                 <div className="flex items-center gap-2">
-                    <Settings01Icon className="w-5 h-5 text-blue-500" />
+                    <Settings className="w-5 h-5 text-blue-500" />
                     <h2 className="text-lg font-semibold">Visual DNA</h2>
                 </div>
                 <div className="flex items-center gap-2">
@@ -52,8 +52,8 @@ export function PromptControls() {
                             useTemplateStore.getState().saveTemplate();
                         }}
                         className={`px-2 py-1 rounded text-xs font-medium transition-colors border ${template.is_public
-                                ? 'bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30'
-                                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
+                            ? 'bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30'
+                            : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
                             }`}
                         title={template.is_public ? "Publicly visible" : "Private template"}
                     >
@@ -66,7 +66,7 @@ export function PromptControls() {
                             title="Simple Mode"
                             aria-label="Switch to Simple Mode"
                         >
-                            <TextFontIcon className="w-4 h-4" />
+                            <Type className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setMode('advanced')}
@@ -74,7 +74,7 @@ export function PromptControls() {
                             title="Advanced Mode (JSON)"
                             aria-label="Switch to Advanced Mode"
                         >
-                            <CodeIcon className="w-4 h-4" />
+                            <Code className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
@@ -110,20 +110,34 @@ export function PromptControls() {
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-400">Lighting</label>
                             <div className="grid grid-cols-2 gap-2">
-                                <input
-                                    type="text"
+                                <select
                                     value={prompt.lighting?.conditions || ''}
                                     onChange={(e) => handleNestedUpdate('lighting', 'conditions', e.target.value)}
-                                    className="bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
-                                    placeholder="Conditions (e.g. Sunny)"
-                                />
-                                <input
-                                    type="text"
+                                    className="bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                >
+                                    <option value="" disabled>Condition</option>
+                                    <option value="Natural">Natural</option>
+                                    <option value="Cinematic">Cinematic</option>
+                                    <option value="Studio">Studio</option>
+                                    <option value="Golden Hour">Golden Hour</option>
+                                    <option value="Blue Hour">Blue Hour</option>
+                                    <option value="Neon">Neon</option>
+                                    <option value="Dark">Dark</option>
+                                </select>
+                                <select
                                     value={prompt.lighting?.direction || ''}
                                     onChange={(e) => handleNestedUpdate('lighting', 'direction', e.target.value)}
-                                    className="bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
-                                    placeholder="Direction"
-                                />
+                                    className="bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                >
+                                    <option value="" disabled>Direction</option>
+                                    <option value="Front">Front</option>
+                                    <option value="Side">Side</option>
+                                    <option value="Back">Back</option>
+                                    <option value="Top-down">Top-down</option>
+                                    <option value="Bottom-up">Bottom-up</option>
+                                    <option value="Rim">Rim</option>
+                                    <option value="Volumetric">Volumetric</option>
+                                </select>
                             </div>
                         </div>
 
