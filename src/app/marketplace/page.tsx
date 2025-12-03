@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTemplateStore } from '@/lib/stores/template-store';
 import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
@@ -27,6 +29,9 @@ export default function MarketplacePage() {
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
+    const [remixingId, setRemixingId] = useState<string | null>(null);
+    const { remixTemplate } = useTemplateStore();
+    const router = useRouter();
 
     // Debounce search query
     useEffect(() => {
@@ -54,6 +59,20 @@ export default function MarketplacePage() {
             setError(err instanceof Error ? err.message : 'Failed to load marketplace');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRemix = async (templateId: string) => {
+        if (remixingId) return;
+        setRemixingId(templateId);
+        try {
+            const newId = await remixTemplate(templateId);
+            router.push(`/editor/${newId}`);
+        } catch (err) {
+            console.error('Remix failed:', err);
+            // Optional: Show toast error
+        } finally {
+            setRemixingId(null);
         }
     };
 
@@ -138,9 +157,17 @@ export default function MarketplacePage() {
                                                 className="object-cover group-hover:scale-105 transition-transform duration-500"
                                             />
                                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <button className="px-4 py-2 bg-white text-slate-900 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-50 transition-colors">
-                                                    <Copy className="w-4 h-4" />
-                                                    Clone Template
+                                                <button
+                                                    onClick={() => handleRemix(template.id)}
+                                                    disabled={remixingId === template.id}
+                                                    className="px-4 py-2 bg-white text-slate-900 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {remixingId === template.id ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        <Copy className="w-4 h-4" />
+                                                    )}
+                                                    {remixingId === template.id ? 'Cloning...' : 'Clone Template'}
                                                 </button>
                                             </div>
                                         </div>

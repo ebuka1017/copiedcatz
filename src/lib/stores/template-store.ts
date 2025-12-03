@@ -94,6 +94,9 @@ interface TemplateState {
     // Internal
     _pushHistory: () => void;
     _debouncedPushHistory: any; // Typed as any to avoid complex Lodash types in interface
+
+    // Remix
+    remixTemplate: (templateId: string) => Promise<string>;
 }
 
 // ============================================================================
@@ -370,6 +373,20 @@ export const useTemplateStore = create<TemplateState>()(
                         }
 
                         get().reset();
+                    },
+
+                    remixTemplate: async (templateId) => {
+                        const response = await fetch(`/api/templates/${templateId}/clone`, {
+                            method: 'POST',
+                        });
+
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.message || 'Remix failed');
+                        }
+
+                        const newTemplate = await response.json();
+                        return newTemplate.id;
                     },
 
                     // ==================================================================
