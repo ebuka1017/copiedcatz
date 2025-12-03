@@ -28,7 +28,7 @@ export async function POST(req: Request) {
                     email: record.email,
                     name: record.raw_user_meta_data?.name || null,
                     email_verified: record.email_confirmed_at !== null,
-                    password_hash: 'managed_by_supabase', // Not used
+
                     plan: 'FREE',
                     credits_remaining: 10, // Free tier credits
                 },

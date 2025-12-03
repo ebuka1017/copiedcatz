@@ -17,7 +17,7 @@ async function generateToken() {
             data: {
                 email: 'test@copiedcatz.com',
                 name: 'Test User',
-                password_hash: 'mock_hash', // We don't use this for JWT auth
+
                 plan: 'PRO',
                 credits_remaining: 100,
             }

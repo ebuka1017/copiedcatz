@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { GlassCard } from '@/components/ui/glass-card';
 import { GlassButton } from '@/components/ui/glass-button';
-import { ChromeIcon, ArrowRight01Icon, MagicWand01Icon, Layers01Icon } from '@hugeicons/react';
+import { Chrome, ArrowRight, Wand2, Layers } from 'lucide-react';
 
 export default function OnboardingPage() {
     return (
@@ -24,7 +24,7 @@ export default function OnboardingPage() {
                 <div className="grid md:grid-cols-3 gap-6">
                     <GlassCard className="p-6 space-y-4 text-center">
                         <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mx-auto text-blue-400">
-                            <ChromeIcon size={24} />
+                            <Chrome size={24} />
                         </div>
                         <h3 className="text-lg font-semibold text-white">1. Install Extension</h3>
                         <p className="text-sm text-slate-400">
@@ -34,7 +34,7 @@ export default function OnboardingPage() {
 
                     <GlassCard className="p-6 space-y-4 text-center">
                         <div className="w-12 h-12 bg-cyan-500/10 rounded-xl flex items-center justify-center mx-auto text-cyan-400">
-                            <Layers01Icon size={24} />
+                            <Layers size={24} />
                         </div>
                         <h3 className="text-lg font-semibold text-white">2. Capture Style</h3>
                         <p className="text-sm text-slate-400">
@@ -44,7 +44,7 @@ export default function OnboardingPage() {
 
                     <GlassCard className="p-6 space-y-4 text-center">
                         <div className="w-12 h-12 bg-pink-500/10 rounded-xl flex items-center justify-center mx-auto text-pink-400">
-                            <MagicWand01Icon size={24} />
+                            <Wand2 size={24} />
                         </div>
                         <h3 className="text-lg font-semibold text-white">3. Remix & Create</h3>
                         <p className="text-sm text-slate-400">
@@ -66,9 +66,9 @@ export default function OnboardingPage() {
                         variant="primary"
                         className="px-8"
                     >
-                        <ChromeIcon size={20} className="mr-2" />
+                        <Chrome size={20} className="mr-2" />
                         Install Extension
-                        <ArrowRight01Icon size={20} className="ml-2" />
+                        <ArrowRight size={20} className="ml-2" />
                     </GlassButton>
                 </div>
             </div>

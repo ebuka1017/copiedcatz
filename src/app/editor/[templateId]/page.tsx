@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import { EditorLayout } from '@/components/editor/editor-layout';
 import { Canvas } from '@/components/editor/canvas';
-import { Controls } from '@/components/editor/controls';
+import { PromptControls } from '@/components/editor/prompt-controls';
 import { useTemplateKeyboardShortcuts } from '@/lib/hooks/use-template-shortcuts';
 import { Settings, X } from 'lucide-react';
 
@@ -56,7 +56,7 @@ export default function EditorPage() {
 
                 {/* Desktop Sidebar */}
                 <div className="hidden md:block w-[400px] flex-shrink-0">
-                    <Controls />
+                    <PromptControls />
                 </div>
 
                 {/* Mobile Drawer */}
@@ -75,7 +75,7 @@ export default function EditorPage() {
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            <Controls />
+                            <PromptControls />
                         </div>
                     </div>
                 )}

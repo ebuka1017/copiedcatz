@@ -8,10 +8,10 @@ import { useState } from 'react';
 
 const CATEGORIES: { key: keyof StructuredPrompt; label: string; icon: string }[] = [
     { key: 'lighting', label: 'Lighting', icon: '💡' },
-    { key: 'camera', label: 'Camera', icon: '📷' },
-    { key: 'composition', label: 'Composition', icon: '🎨' },
-    { key: 'color', label: 'Color', icon: '🌈' },
-    { key: 'style', label: 'Style', icon: '✨' },
+    { key: 'photographic_characteristics', label: 'Camera', icon: '📷' },
+    { key: 'aesthetics', label: 'Aesthetics', icon: '🎨' },
+    { key: 'artistic_style', label: 'Style', icon: '✨' },
+    { key: 'background_setting', label: 'Background', icon: '🌄' },
 ];
 
 export function Controls() {

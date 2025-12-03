@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 // ============================================================================
 
 import { StructuredPrompt } from '@/lib/bria/types';
+export type { StructuredPrompt };
 
 // Legacy definition removed in favor of Bria V2
 // export interface StructuredPrompt { ... }

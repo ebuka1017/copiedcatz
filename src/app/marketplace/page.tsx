@@ -8,8 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { GlassCard } from "@/components/ui/glass-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorDisplay } from "@/components/ui/error-display";
-import { Loader2, Search, Copy } from "lucide-react";
-import { Store01Icon } from "@hugeicons/react";
+import { Loader2, Search, Copy, Store } from "lucide-react";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -94,59 +93,73 @@ export default function MarketplacePage() {
                         <input
                             type="text"
                             value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search templates..."
+                            className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-white placeholder-slate-500 backdrop-blur-sm transition-all"
+                        />
+                    </div>
+
+
+                    {loading ? (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="h-full flex flex-col">
+                                    <Skeleton className="aspect-video mb-4 rounded-xl" />
+                                    <Skeleton className="h-6 w-3/4 mb-2" />
+                                    <Skeleton className="h-4 w-1/2" />
                                 </div>
                             ))}
-                </div>
-                ) : error ? (
-                <ErrorDisplay message={error} onRetry={fetchMarketplace} />
-                ) : templates.length === 0 ? (
-                <EmptyState
-                    icon={Store01Icon}
-                    title="Marketplace is empty"
-                    description="Be the first to publish a template!"
-                    actionLabel="Go to Dashboard"
-                    actionHref="/"
-                />
-                ) : (
-                <motion.div
-                    className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                >
-                    {templates.map((template) => (
-                        <motion.div key={template.id} variants={itemVariants}>
-                            <GlassCard className="h-full flex flex-col p-0 overflow-hidden group hover:border-blue-500/30 transition-colors">
-                                <div className="relative aspect-video bg-slate-800">
-                                    <Image
-                                        src={template.original_image_url}
-                                        alt={template.name}
-                                        fill
-                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <button className="px-4 py-2 bg-white text-slate-900 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-50 transition-colors">
-                                            <Copy className="w-4 h-4" />
-                                            Clone Template
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="p-5 flex-grow flex flex-col">
-                                    <h3 className="font-bold text-lg mb-1 truncate">{template.name}</h3>
-                                    <div className="flex items-center justify-between text-sm text-slate-400 mt-2">
-                                        <span>by {template.user.name || 'Anonymous'}</span>
-                                        <span>{template._count.variations} uses</span>
-                                    </div>
-                                </div>
-                            </GlassCard>
+                        </div>
+                    ) : error ? (
+                        <ErrorDisplay message={error} onRetry={fetchMarketplace} />
+                    ) : templates.length === 0 ? (
+                        <EmptyState
+                            icon={Store}
+                            title="Marketplace is empty"
+                            description="Be the first to publish a template!"
+                            actionLabel="Go to Dashboard"
+                            actionHref="/"
+                        />
+                    ) : (
+                        <motion.div
+                            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
+                            {templates.map((template) => (
+                                <motion.div key={template.id} variants={itemVariants}>
+                                    <GlassCard className="h-full flex flex-col p-0 overflow-hidden group hover:border-blue-500/30 transition-colors">
+                                        <div className="relative aspect-video bg-slate-800">
+                                            <Image
+                                                src={template.original_image_url}
+                                                alt={template.name}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <button className="px-4 py-2 bg-white text-slate-900 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-50 transition-colors">
+                                                    <Copy className="w-4 h-4" />
+                                                    Clone Template
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="p-5 flex-grow flex flex-col">
+                                            <h3 className="font-bold text-lg mb-1 truncate">{template.name}</h3>
+                                            <div className="flex items-center justify-between text-sm text-slate-400 mt-2">
+                                                <span>by {template.user.name || 'Anonymous'}</span>
+                                                <span>{template._count.variations} uses</span>
+                                            </div>
+                                        </div>
+                                    </GlassCard>
+                                </motion.div>
+                            ))}
                         </motion.div>
-                    ))}
-                </motion.div>
                     )}
-        </div>
+                </div>
             </main >
 
-        <Footer />
+            <Footer />
         </div >
     );
 }

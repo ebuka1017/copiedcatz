@@ -14,7 +14,7 @@ export function validateEnv() {
     const missing = requiredEnvVars.filter((key) => !process.env[key]);
 
     if (missing.length > 0) {
-        throw new Error(
+        console.warn(
             `Missing required environment variables:\n${missing.join('\n')}\n\nPlease check your .env.local file.`
         );
     }

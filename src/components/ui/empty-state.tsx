@@ -1,8 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { GlassButton } from '@/components/ui/glass-button';
-import { LucideIcon } from 'lucide-react'; // Fallback for types if needed, but we use Hugeicons mainly now
-import { PlusSignIcon } from '@hugeicons/react';
+import { LucideIcon, Plus } from 'lucide-react';
 
 interface EmptyStateProps {
     icon: React.ElementType;
@@ -34,12 +33,12 @@ export function EmptyState({
                 <div className="pt-2">
                     {actionHref ? (
                         <GlassButton href={actionHref} variant="primary">
-                            <PlusSignIcon size={20} className="mr-2" />
+                            <Plus size={20} className="mr-2" />
                             {actionLabel}
                         </GlassButton>
                     ) : (
                         <GlassButton onClick={actionOnClick} variant="primary">
-                            <PlusSignIcon size={20} className="mr-2" />
+                            <Plus size={20} className="mr-2" />
                             {actionLabel}
                         </GlassButton>
                     )}

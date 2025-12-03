@@ -11,7 +11,6 @@ import { ErrorDisplay } from "@/components/ui/error-display";
 import { UsageStats } from "@/components/dashboard/usage-stats";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit, Trash2, Loader2, AlertCircle } from "lucide-react";
-import { Add01Icon } from "@hugeicons/react";
 import { motion } from "framer-motion";
 
 interface Template {
@@ -126,7 +125,7 @@ export default function Dashboard() {
             />
           ) : templates.length === 0 ? (
             <EmptyState
-              icon={Add01Icon}
+              icon={Plus}
               title="No templates yet"
               description="Create your first template to start generating variations."
               actionLabel="Create Template"
