@@ -30,6 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# security
+.env
+.env.local
+
 
 # vercel
 .vercel
