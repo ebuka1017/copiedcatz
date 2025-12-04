@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import Image from "next/image";
@@ -41,11 +41,7 @@ export default function MarketplacePage() {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
-    useEffect(() => {
-        fetchMarketplace();
-    }, [debouncedQuery]);
-
-    const fetchMarketplace = async () => {
+    const fetchMarketplace = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
@@ -60,7 +56,11 @@ export default function MarketplacePage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [debouncedQuery]);
+
+    useEffect(() => {
+        fetchMarketplace();
+    }, [fetchMarketplace]);
 
     const handleRemix = async (templateId: string) => {
         if (remixingId) return;

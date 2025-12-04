@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:extension": "vite build --config vite.config.extension.ts"
+    "build:extension": "vite build --config vite.config.extension.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
