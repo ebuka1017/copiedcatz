@@ -1,3 +1,4 @@
+import 'server-only';
 import Pusher from 'pusher';
 
 export const pusher = new Pusher({
