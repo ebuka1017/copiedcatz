@@ -54,13 +54,21 @@ export default function NewProjectPage() {
                 throw error;
             }
 
-            // 2. Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('uploads')
-                .getPublicUrl(fileName);
+            // 2. Create Upload Record in DB
+            const uploadRes = await fetch('/api/uploads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filepath: fileName }),
+            });
 
-            // 3. Start extraction with the public URL
-            await startExtraction(publicUrl);
+            if (!uploadRes.ok) {
+                throw new Error('Failed to create upload record');
+            }
+
+            const { id: uploadId } = await uploadRes.json();
+
+            // 3. Start extraction with the Upload ID
+            await startExtraction(uploadId);
 
         } catch (error) {
             console.error('Upload failed:', error);
