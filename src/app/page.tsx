@@ -88,15 +88,15 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-24 px-6 bg-slate-900/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl md:text-5xl font-bold">From Image to Code in Seconds</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">Stop rebuilding from scratch. CopiedCatz deconstructs visuals into usable components.</p>
+            <h2 className="text-3xl md:text-5xl font-bold">From Image to Remix in Seconds</h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">Stop guessing visual parameters. CopiedCatz extracts the DNA so you can generate new variations.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { title: 'Upload Image', desc: 'Drag and drop any screenshot or design file.', icon: Layers, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-              { title: 'AI Extraction', desc: 'Our engine identifies fonts, palettes, and layout structures.', icon: Sparkles, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-              { title: 'Export & Remix', desc: 'Get clean CSS/Tailwind code or edit directly in our studio.', icon: Zap, color: 'text-pink-400', bg: 'bg-pink-500/10' }
+              { title: 'Upload Image', desc: 'Drag and drop any reference image.', icon: Layers, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+              { title: 'DNA Extraction', desc: 'Our engine identifies lighting, composition, and style.', icon: Sparkles, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+              { title: 'Generate & Remix', desc: 'Create infinite new image variations based on the source style.', icon: Zap, color: 'text-pink-400', bg: 'bg-pink-500/10' }
             ].map((feature, i) => (
               <GlassCard key={i} className="p-8 hover:bg-white/5 transition-colors group">
                 <div className={`w-14 h-14 rounded-2xl ${feature.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
@@ -124,23 +124,23 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <Link href="/use-cases/landing-pages" className="group">
+            <Link href="/use-cases/digital-artists" className="group">
               <GlassCard className="h-64 p-8 flex items-end relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
-                <Image src="/hero-visual.png" alt="Landing Pages" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                <Image src="/hero-visual.png" alt="Digital Artists" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="relative z-20">
-                  <h3 className="text-2xl font-bold text-white mb-2">Modern Landing Pages</h3>
-                  <p className="text-slate-300">Clone high-converting structures instantly.</p>
+                  <h3 className="text-2xl font-bold text-white mb-2">Digital Artists</h3>
+                  <p className="text-slate-300">Expand your stylistic horizons and break blocks.</p>
                 </div>
               </GlassCard>
             </Link>
-            <Link href="/use-cases/dashboards" className="group">
+            <Link href="/use-cases/brand-designers" className="group">
               <GlassCard className="h-64 p-8 flex items-end relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
-                <Image src="/hero-visual.png" alt="Dashboards" fill className="object-cover group-hover:scale-105 transition-transform duration-700 hue-rotate-30" />
+                <Image src="/hero-visual.png" alt="Brand Designers" fill className="object-cover group-hover:scale-105 transition-transform duration-700 hue-rotate-30" />
                 <div className="relative z-20">
-                  <h3 className="text-2xl font-bold text-white mb-2">Complex Dashboards</h3>
-                  <p className="text-slate-300">Replicate intricate data visualization layouts.</p>
+                  <h3 className="text-2xl font-bold text-white mb-2">Brand Designers</h3>
+                  <p className="text-slate-300">Maintain visual consistency across campaigns.</p>
                 </div>
               </GlassCard>
             </Link>

@@ -13,6 +13,7 @@ import buttonStyles from '@/components/ui/glass-button.module.css';
 
 export default function NewProjectPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -30,6 +31,54 @@ export default function NewProjectPage() {
             alert('Failed to process image');
         }
     });
+
+    const handleFileSelect = async (file: File) => {
+        if (!file) return;
+
+        // Since we are using Supabase storage client-side, we should probably do the upload here
+        // But wait, the previous code I wrote used verifyAuth on server.
+        // Let's us the supabase client upload pattern I wrote in Step 276.
+        // Wait, I need to make sure I have the imports.
+        // I see createClient and useAuth imported.
+
+        if (!user) {
+            alert("Please log in to upload.");
+            return;
+        }
+
+        try {
+            // 1. Upload to Supabase Storage
+            const supabase = createClient();
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}/${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+            const { data, error } = await supabase.storage
+                .from('uploads')
+                .upload(fileName, file);
+
+            if (error) {
+                console.error('Supabase upload error:', error);
+                throw error;
+            }
+
+            // 2. Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('uploads')
+                .getPublicUrl(fileName);
+
+            // 3. Start extraction with the public URL
+            await startExtraction(publicUrl);
+
+        } catch (error) {
+            console.error('Upload failed:', error);
+            alert('Upload failed: ' + (error as any).message);
+        }
+    };
+
+    const onDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
 
     const onDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
