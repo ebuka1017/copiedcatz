@@ -2,7 +2,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { GlassButton } from '@/components/ui/glass-button';
+import { Button } from '@/components/ui/button';
 
 interface Props {
     children: ReactNode;
@@ -45,16 +45,17 @@ export class ErrorBoundary extends Component<Props, State> {
                             {this.state.error?.message || 'An unexpected error occurred while rendering this component.'}
                         </p>
                     </div>
-                    <GlassButton
+                    <Button
                         onClick={() => {
                             this.setState({ hasError: false, error: null });
                             window.location.reload();
                         }}
                         variant="secondary"
+                        className="bg-slate-800 hover:bg-slate-700 text-white"
                     >
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Reload Page
-                    </GlassButton>
+                    </Button>
                 </div>
             );
         }

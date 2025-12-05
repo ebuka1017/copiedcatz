@@ -8,8 +8,8 @@ import { useExtraction } from '@/lib/hooks/use-extraction';
 import { ExtractionProgress } from '@/components/extraction-progress';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
-import cardStyles from '@/components/ui/glass-card.module.css';
-import buttonStyles from '@/components/ui/glass-button.module.css';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function NewProjectPage() {
     const router = useRouter();
@@ -108,7 +108,7 @@ export default function NewProjectPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4">
-            <div className={`${cardStyles.card} max-w-2xl w-full p-12 text-center`}>
+            <Card className="max-w-2xl w-full p-12 text-center bg-slate-900 border-slate-800">
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
                         Create New Template
@@ -142,9 +142,9 @@ export default function NewProjectPage() {
                             Supports JPG, PNG, WEBP up to 10MB
                         </p>
 
-                        <button
+                        <Button
                             onClick={() => fileInputRef.current?.click()}
-                            className={buttonStyles.button}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 mx-auto"
                         >
                             <ImageIcon className="w-5 h-5" />
                             Browse Files
@@ -162,7 +162,7 @@ export default function NewProjectPage() {
                         />
                     </div>
                 </div>
-            </div>
+            </Card>
         </div>
     );
 }

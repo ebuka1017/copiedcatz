@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { GlassCard } from '@/components/ui/glass-card';
-import { GlassButton } from '@/components/ui/glass-button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
@@ -41,7 +41,7 @@ export default function LoginPage() {
     };
 
     return (
-        <GlassCard className="p-8 space-y-6">
+        <Card className="p-8 space-y-6 bg-slate-900 border-slate-800">
             <div className="text-center space-y-2">
                 <h1 className="text-2xl font-bold text-white">Welcome Back</h1>
                 <p className="text-slate-400 text-sm">Sign in to continue to Copiedcatz</p>
@@ -78,7 +78,7 @@ export default function LoginPage() {
                     />
                 </div>
 
-                <GlassButton
+                <Button
                     type="submit"
                     variant="primary"
                     className="w-full justify-center"
@@ -92,7 +92,7 @@ export default function LoginPage() {
                     ) : (
                         'Sign In'
                     )}
-                </GlassButton>
+                </Button>
             </form>
 
             <div className="text-center text-sm text-slate-400">
@@ -101,6 +101,6 @@ export default function LoginPage() {
                     Sign up
                 </Link>
             </div>
-        </GlassCard>
+        </Card>
     );
 }

@@ -2,7 +2,7 @@
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { GlassCard } from "@/components/ui/glass-card";
+import { Card } from "@/components/ui/card";
 import { Mail, Twitter } from "lucide-react";
 import Link from "next/link";
 
@@ -12,7 +12,7 @@ export default function ContactPage() {
             <Navbar />
 
             <main className="flex-grow flex items-center justify-center p-6 pt-20">
-                <GlassCard className="max-w-md w-full p-8 space-y-8">
+                <Card className="max-w-md w-full p-8 space-y-8 bg-slate-900 border-slate-800">
                     <div className="text-center space-y-2">
                         <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-400">
                             Get in Touch
@@ -53,10 +53,10 @@ export default function ContactPage() {
                             Built by <span className="text-white font-medium">hiro__</span>
                         </p>
                     </div>
-                </GlassCard>
+                </Card>
             </main>
 
             <Footer />
-        </div>
+        </div >
     );
 }

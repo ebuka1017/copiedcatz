@@ -2,7 +2,7 @@
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { GlassCard } from "@/components/ui/glass-card";
+import { Card } from "@/components/ui/card";
 import { Download, FolderOpen, Puzzle, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 
@@ -19,7 +19,7 @@ export default function InstallExtensionPage() {
                         <p className="text-xl text-slate-400">Enable visual extraction functionalities in your browser.</p>
                     </div>
 
-                    <GlassCard className="p-8 md:p-12">
+                    <Card className="p-8 md:p-12 bg-slate-900 border-slate-800">
                         <div className="space-y-12">
 
                             <div className="flex flex-col md:flex-row gap-8 items-start">
@@ -66,7 +66,7 @@ export default function InstallExtensionPage() {
                             </div>
 
                         </div>
-                    </GlassCard>
+                    </Card>
 
                     <div className="text-center">
                         <Link href="/dashboard">

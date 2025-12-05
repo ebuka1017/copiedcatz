@@ -1,6 +1,6 @@
 'use client';
 
-import { GlassCard } from '@/components/ui/glass-card';
+import { Card } from '@/components/ui/card';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import { useOptimisticGeneration } from '@/lib/hooks/use-optimistic-generation';
 import Image from 'next/image';
@@ -19,7 +19,7 @@ export function Canvas() {
     const displayImage = latestVariation?.image_url || template.original_image_url;
 
     return (
-        <GlassCard className="h-full flex items-center justify-center p-8 relative overflow-hidden group">
+        <Card className="h-full flex items-center justify-center p-8 relative overflow-hidden group bg-slate-900 border-slate-800">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
                 style={{
@@ -53,7 +53,8 @@ export function Canvas() {
                         </div>
                     </div>
                 )}
+                )}
             </div>
-        </GlassCard>
+        </Card>
     );
 }

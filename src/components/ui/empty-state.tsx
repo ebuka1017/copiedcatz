@@ -1,6 +1,5 @@
-import React from 'react';
 import Link from 'next/link';
-import { GlassButton } from '@/components/ui/glass-button';
+import { Button } from '@/components/ui/button';
 import { LucideIcon, Plus } from 'lucide-react';
 
 interface EmptyStateProps {
@@ -32,15 +31,15 @@ export function EmptyState({
             {actionLabel && (
                 <div className="pt-2">
                     {actionHref ? (
-                        <GlassButton href={actionHref} variant="primary">
+                        <Button href={actionHref} variant="primary">
                             <Plus size={20} className="mr-2" />
                             {actionLabel}
-                        </GlassButton>
+                        </Button>
                     ) : (
-                        <GlassButton onClick={actionOnClick} variant="primary">
+                        <Button onClick={actionOnClick} variant="primary">
                             <Plus size={20} className="mr-2" />
                             {actionLabel}
-                        </GlassButton>
+                        </Button>
                     )}
                 </div>
             )}

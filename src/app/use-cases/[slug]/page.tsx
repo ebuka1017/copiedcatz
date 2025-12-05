@@ -1,8 +1,9 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { GlassCard } from "@/components/ui/glass-card";
+import { Card } from "@/components/ui/card";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 // Use Case Data
@@ -17,7 +18,8 @@ const useCases = {
             "Maintain consistent style across a series of works.",
             "Generate high-quality reference material."
         ],
-        gradient: "from-pink-500 to-rose-500"
+        gradient: "from-pink-500 to-rose-500",
+        image: "/use-cases/digital-artists.png"
     },
     "brand-designers": {
         title: "Brand Designers",
@@ -29,7 +31,8 @@ const useCases = {
             "Rapidly iterate on campaign concepts.",
             "Reduce stock photo costs."
         ],
-        gradient: "from-blue-500 to-cyan-500"
+        gradient: "from-blue-500 to-cyan-500",
+        image: "/use-cases/brand-designers.png"
     },
     "game-developers": {
         title: "Game Developers",
@@ -41,7 +44,8 @@ const useCases = {
             "Rapidly prototype different visual directions.",
             "Maintain art direction fidelity."
         ],
-        gradient: "from-purple-500 to-violet-500"
+        gradient: "from-purple-500 to-violet-500",
+        image: "/use-cases/game-developers.png"
     }
 };
 
@@ -93,13 +97,14 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
 
                     <div className="relative">
                         <div className={`absolute inset-0 bg-gradient-to-r ${data.gradient} blur-3xl opacity-20 rounded-full`}></div>
-                        <GlassCard className="relative aspect-square flex items-center justify-center p-12 border-white/10">
-                            <div className="text-center space-y-4">
-                                <div className="text-6xl">✨</div>
-                                <h3 className="text-2xl font-bold">Visual DNA Extracted</h3>
-                                <p className="text-slate-400">Ready to replicate style...</p>
-                            </div>
-                        </GlassCard>
+                        <Card className="relative aspect-square flex items-center justify-center p-0 border-slate-700 bg-slate-900/90 overflow-hidden">
+                            <Image
+                                src={data.image}
+                                alt={data.title}
+                                fill
+                                className="object-cover"
+                            />
+                        </Card>
                     </div>
                 </div>
             </main>

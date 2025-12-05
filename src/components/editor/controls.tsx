@@ -1,7 +1,7 @@
 'use client';
 
-import { GlassCard } from '@/components/ui/glass-card';
-import { GlassButton } from '@/components/ui/glass-button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useTemplateStore, StructuredPrompt } from '@/lib/stores/template-store';
 import { Wand2 } from 'lucide-react';
 import { useState } from 'react';
@@ -32,7 +32,7 @@ export function Controls() {
     return (
         <div className="flex flex-col h-full gap-4">
             {/* Category Navigation */}
-            <GlassCard className="p-2 flex gap-1 overflow-x-auto no-scrollbar">
+            <Card className="p-2 flex gap-1 overflow-x-auto no-scrollbar bg-slate-900 border-slate-800">
                 {CATEGORIES.map((cat) => (
                     <button
                         key={cat.key}
@@ -40,18 +40,18 @@ export function Controls() {
                         className={`
               px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all
               ${activeCategory === cat.key
-                                ? 'bg-blue-500 text-white shadow-lg'
-                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}
+                                ? 'bg-blue-600 text-white shadow-lg'
+                                : 'text-slate-400 hover:bg-slate-800'}
             `}
                     >
                         <span className="mr-2">{cat.icon}</span>
                         {cat.label}
                     </button>
                 ))}
-            </GlassCard>
+            </Card>
 
             {/* Controls Area */}
-            <GlassCard className="flex-1 p-6 overflow-y-auto">
+            <Card className="flex-1 p-6 overflow-y-auto bg-slate-900 border-slate-800">
                 <div className="space-y-6">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold capitalize">
@@ -109,26 +109,26 @@ export function Controls() {
                         </div>
                     ))}
                 </div>
-            </GlassCard>
+            </Card>
 
             {/* Generate Button */}
-            <GlassButton
+            <Button
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="w-full py-4 text-lg shadow-xl shadow-blue-500/20"
+                className="w-full py-4 text-lg shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-500 text-white h-auto"
             >
                 {isGenerating ? (
                     <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
                         Generating...
                     </>
                 ) : (
                     <>
-                        <Wand2 className="w-5 h-5" />
+                        <Wand2 className="w-5 h-5 mr-2" />
                         Generate Variation
                     </>
                 )}
-            </GlassButton>
+            </Button>
         </div>
     );
 }

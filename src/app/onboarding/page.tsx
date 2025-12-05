@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { GlassCard } from '@/components/ui/glass-card';
-import { GlassButton } from '@/components/ui/glass-button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Chrome, ArrowRight, Wand2, Layers } from 'lucide-react';
 
 export default function OnboardingPage() {
@@ -22,7 +22,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-6">
-                    <GlassCard className="p-6 space-y-4 text-center">
+                    <Card className="p-6 space-y-4 text-center bg-slate-900 border-slate-800">
                         <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mx-auto text-blue-400">
                             <Chrome size={24} />
                         </div>
@@ -30,9 +30,9 @@ export default function OnboardingPage() {
                         <p className="text-sm text-slate-400">
                             Add our Chrome extension to your browser to enable the capture tools.
                         </p>
-                    </GlassCard>
+                    </Card>
 
-                    <GlassCard className="p-6 space-y-4 text-center">
+                    <Card className="p-6 space-y-4 text-center bg-slate-900 border-slate-800">
                         <div className="w-12 h-12 bg-cyan-500/10 rounded-xl flex items-center justify-center mx-auto text-cyan-400">
                             <Layers size={24} />
                         </div>
@@ -40,9 +40,9 @@ export default function OnboardingPage() {
                         <p className="text-sm text-slate-400">
                             Right-click any image or select an area to extract its lighting, composition, and mood.
                         </p>
-                    </GlassCard>
+                    </Card>
 
-                    <GlassCard className="p-6 space-y-4 text-center">
+                    <Card className="p-6 space-y-4 text-center bg-slate-900 border-slate-800">
                         <div className="w-12 h-12 bg-pink-500/10 rounded-xl flex items-center justify-center mx-auto text-pink-400">
                             <Wand2 size={24} />
                         </div>
@@ -50,18 +50,18 @@ export default function OnboardingPage() {
                         <p className="text-sm text-slate-400">
                             Use the extracted DNA to generate new visuals that match the exact vibe you want.
                         </p>
-                    </GlassCard>
+                    </Card>
                 </div>
 
                 <div className="flex justify-center gap-4 pt-8">
-                    <GlassButton
+                    <Button
                         href="/dashboard"
                         variant="secondary"
                         className="px-8"
                     >
                         Skip to Dashboard
-                    </GlassButton>
-                    <GlassButton
+                    </Button>
+                    <Button
                         href="https://chrome.google.com/webstore/detail/your-extension-id"
                         variant="primary"
                         className="px-8"
@@ -69,7 +69,7 @@ export default function OnboardingPage() {
                         <Chrome size={20} className="mr-2" />
                         Install Extension
                         <ArrowRight size={20} className="ml-2" />
-                    </GlassButton>
+                    </Button>
                 </div>
             </div>
         </div>

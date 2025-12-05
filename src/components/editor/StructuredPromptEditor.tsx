@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { StructuredPrompt } from '@/lib/bria/types';
-import { GlassCard } from '@/components/ui/glass-card';
-import { GlassButton } from '@/components/ui/glass-button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { AlertCircle, Check, Copy, FileJson } from 'lucide-react';
 
 interface StructuredPromptEditorProps {
@@ -56,16 +56,16 @@ export function StructuredPromptEditor({ initialPrompt, onChange, className }: S
     };
 
     return (
-        <GlassCard className={`flex flex-col h-full ${className}`}>
+        <Card className={`flex flex-col h-full bg-slate-900 border-slate-800 ${className}`}>
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <FileJson className="w-5 h-5 text-blue-400" />
                     <h3 className="font-semibold text-slate-900 dark:text-white">Structured Prompt</h3>
                 </div>
                 <div className="flex items-center gap-2">
-                    <GlassButton variant="secondary" onClick={formatJson} disabled={!isValid} className="text-xs h-8">
+                    <Button variant="secondary" onClick={formatJson} disabled={!isValid} className="text-xs h-8">
                         Format
-                    </GlassButton>
+                    </Button>
                 </div>
             </div>
 
@@ -74,8 +74,8 @@ export function StructuredPromptEditor({ initialPrompt, onChange, className }: S
                     value={jsonString}
                     onChange={handleJsonChange}
                     className={`w-full h-full min-h-[400px] bg-slate-50 dark:bg-slate-900/50 border rounded-lg p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 transition-all ${isValid
-                            ? 'border-slate-200 dark:border-slate-700 focus:ring-blue-500/50'
-                            : 'border-red-500/50 focus:ring-red-500/50'
+                        ? 'border-slate-200 dark:border-slate-700 focus:ring-blue-500/50'
+                        : 'border-red-500/50 focus:ring-red-500/50'
                         }`}
                     spellCheck={false}
                     placeholder="// Enter structured prompt JSON here..."
@@ -92,6 +92,6 @@ export function StructuredPromptEditor({ initialPrompt, onChange, className }: S
             <div className="mt-4 text-xs text-slate-500 dark:text-slate-400">
                 <p>Edit the JSON to refine the image generation. Changes are applied automatically when valid.</p>
             </div>
-        </GlassCard>
+        </Card>
     );
 }

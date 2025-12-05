@@ -5,8 +5,8 @@ import { useTemplateStore } from '@/lib/stores/template-store';
 import { StructuredPrompt } from '@/lib/bria/types';
 import { StructuredPromptEditor } from '@/components/editor/StructuredPromptEditor';
 import { Settings, Code, Type } from 'lucide-react';
-import styles from '@/components/ui/glass-card.module.css';
-import { GlassButton } from '@/components/ui/glass-button';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 export function PromptControls() {
     const template = useTemplateStore(state => state.template);
@@ -36,7 +36,7 @@ export function PromptControls() {
     };
 
     return (
-        <div className={`${styles.card} h-full flex flex-col overflow-hidden`}>
+        <Card className="h-full flex flex-col overflow-hidden bg-slate-900 border-slate-800 rounded-none border-l">
             <div className="p-4 border-b border-slate-200/10 flex flex-col gap-4 bg-white/5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

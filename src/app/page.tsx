@@ -1,8 +1,6 @@
-'use client';
-
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { GlassCard } from "@/components/ui/glass-card";
+import { Card } from "@/components/ui/card";
 import { ArrowRight, Sparkles, Layers, Zap } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -50,7 +48,7 @@ export default function LandingPage() {
 
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-pink-500/20 blur-3xl -z-10 rounded-full"></div>
-            <GlassCard className="p-2 transform rotate-2 hover:rotate-0 transition-transform duration-700">
+            <Card className="p-2 transform rotate-2 hover:rotate-0 transition-transform duration-700 bg-slate-900/80 border-slate-700">
               <Image
                 src="/hero-visual.png"
                 alt="CopiedCatz Interface"
@@ -58,10 +56,10 @@ export default function LandingPage() {
                 height={600}
                 className="rounded-lg shadow-2xl"
               />
-            </GlassCard>
+            </Card>
 
             {/* Floating Elements */}
-            <GlassCard className="absolute -bottom-6 -left-6 p-4 flex items-center gap-3 animate-bounce shadow-xl" style={{ animationDuration: '3s' }}>
+            <Card className="absolute -bottom-6 -left-6 p-4 flex items-center gap-3 animate-bounce shadow-xl bg-slate-900 border-slate-700" style={{ animationDuration: '3s' }}>
               <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                 <Zap className="w-6 h-6 text-blue-400" />
               </div>
@@ -69,9 +67,9 @@ export default function LandingPage() {
                 <div className="text-xs text-slate-400">Processing Time</div>
                 <div className="font-bold text-lg">0.4s</div>
               </div>
-            </GlassCard>
+            </Card>
 
-            <GlassCard className="absolute -top-6 -right-6 p-4 flex items-center gap-3 animate-bounce shadow-xl" style={{ animationDuration: '4s' }}>
+            <Card className="absolute -top-6 -right-6 p-4 flex items-center gap-3 animate-bounce shadow-xl bg-slate-900 border-slate-700" style={{ animationDuration: '4s' }}>
               <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
                 <Layers className="w-6 h-6 text-pink-400" />
               </div>
@@ -79,7 +77,7 @@ export default function LandingPage() {
                 <div className="text-xs text-slate-400">Layers Extracted</div>
                 <div className="font-bold text-lg">12+</div>
               </div>
-            </GlassCard>
+            </Card>
           </div>
         </div>
       </section>
@@ -98,13 +96,13 @@ export default function LandingPage() {
               { title: 'DNA Extraction', desc: 'Our engine identifies lighting, composition, and style.', icon: Sparkles, color: 'text-purple-400', bg: 'bg-purple-500/10' },
               { title: 'Generate & Remix', desc: 'Create infinite new image variations based on the source style.', icon: Zap, color: 'text-pink-400', bg: 'bg-pink-500/10' }
             ].map((feature, i) => (
-              <GlassCard key={i} className="p-8 hover:bg-white/5 transition-colors group">
+              <Card key={i} className="p-8 hover:bg-white/5 transition-colors group bg-slate-900 border-slate-800">
                 <div className={`w-14 h-14 rounded-2xl ${feature.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                   <feature.icon className={`w-7 h-7 ${feature.color}`} />
                 </div>
                 <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
                 <p className="text-slate-400 leading-relaxed">{feature.desc}</p>
-              </GlassCard>
+              </Card>
             ))}
           </div>
         </div>
@@ -125,33 +123,32 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 gap-8">
             <Link href="/use-cases/digital-artists" className="group">
-              <GlassCard className="h-64 p-8 flex items-end relative overflow-hidden">
+              <Card className="h-64 p-8 flex items-end relative overflow-hidden border-slate-800">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
                 <Image src="/hero-visual.png" alt="Digital Artists" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="relative z-20">
                   <h3 className="text-2xl font-bold text-white mb-2">Digital Artists</h3>
                   <p className="text-slate-300">Expand your stylistic horizons and break blocks.</p>
                 </div>
-              </GlassCard>
+              </Card>
             </Link>
             <Link href="/use-cases/brand-designers" className="group">
-              <GlassCard className="h-64 p-8 flex items-end relative overflow-hidden">
+              <Card className="h-64 p-8 flex items-end relative overflow-hidden border-slate-800">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
                 <Image src="/hero-visual.png" alt="Brand Designers" fill className="object-cover group-hover:scale-105 transition-transform duration-700 hue-rotate-30" />
                 <div className="relative z-20">
                   <h3 className="text-2xl font-bold text-white mb-2">Brand Designers</h3>
                   <p className="text-slate-300">Maintain visual consistency across campaigns.</p>
                 </div>
-              </GlassCard>
+              </Card>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <GlassCard className="p-12 text-center relative overflow-hidden">
+          <Card className="p-12 text-center relative overflow-hidden bg-slate-900 border-slate-800">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
             <h2 className="text-4xl font-bold mb-6">Ready to copy the cat?</h2>
             <p className="text-lg text-slate-400 mb-8 max-w-xl mx-auto">Join thousands of developers using CopiedCatz to speed up their workflow by 10x.</p>
@@ -160,7 +157,7 @@ export default function LandingPage() {
                 Get Started Now
               </button>
             </Link>
-          </GlassCard>
+          </Card>
         </div>
       </section>
 

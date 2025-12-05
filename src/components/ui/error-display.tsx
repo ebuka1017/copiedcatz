@@ -1,5 +1,5 @@
 import React from 'react';
-import { GlassButton } from '@/components/ui/glass-button';
+import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorDisplayProps {
@@ -24,10 +24,10 @@ export function ErrorDisplay({
             </div>
             {onRetry && (
                 <div className="pt-2">
-                    <GlassButton onClick={onRetry} variant="secondary" className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-200">
+                    <Button onClick={onRetry} variant="secondary" className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-200">
                         <RefreshCw size={16} className="mr-2" />
                         Try Again
-                    </GlassButton>
+                    </Button>
                 </div>
             )}
         </div>

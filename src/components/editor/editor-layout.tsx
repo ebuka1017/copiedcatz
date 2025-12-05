@@ -1,6 +1,6 @@
 'use client';
 
-import { GlassButton } from '@/components/ui/glass-button';
+import { Button } from '@/components/ui/button';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import { ArrowLeft, Download, Save, Undo, Redo } from 'lucide-react';
 import Link from 'next/link';
@@ -22,9 +22,9 @@ export function EditorLayout({ children }: EditorLayoutProps) {
                 <div className="h-full max-w-[1920px] mx-auto px-6 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/dashboard">
-                            <GlassButton variant="secondary" className="!p-2">
+                            <Button variant="secondary" className="!p-2">
                                 <ArrowLeft className="w-5 h-5" />
-                            </GlassButton>
+                            </Button>
                         </Link>
                         <h1 className="font-semibold text-slate-900 dark:text-white">
                             Template Editor
@@ -32,31 +32,31 @@ export function EditorLayout({ children }: EditorLayoutProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <GlassButton
+                        <Button
                             variant="secondary"
                             onClick={undo}
                             disabled={!canUndo()}
                             title="Undo (Cmd+Z)"
                         >
                             <Undo className="w-4 h-4" />
-                        </GlassButton>
-                        <GlassButton
+                        </Button>
+                        <Button
                             variant="secondary"
                             onClick={redo}
                             disabled={!canRedo()}
                             title="Redo (Cmd+Shift+Z)"
                         >
                             <Redo className="w-4 h-4" />
-                        </GlassButton>
+                        </Button>
                         <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-2" />
-                        <GlassButton variant="secondary" onClick={() => saveTemplate()}>
-                            <Save className="w-4 h-4" />
+                        <Button variant="secondary" onClick={() => saveTemplate()}>
+                            <Save className="w-4 h-4 mr-2" />
                             Save
-                        </GlassButton>
-                        <GlassButton disabled={isGenerating}>
-                            <Download className="w-4 h-4" />
+                        </Button>
+                        <Button disabled={isGenerating}>
+                            <Download className="w-4 h-4 mr-2" />
                             Export
-                        </GlassButton>
+                        </Button>
                     </div>
                 </div>
             </header>

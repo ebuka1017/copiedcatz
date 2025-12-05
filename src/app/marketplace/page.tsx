@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { GlassCard } from "@/components/ui/glass-card";
+import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Loader2, Search, Copy, Store } from "lucide-react";
@@ -148,7 +148,7 @@ export default function MarketplacePage() {
                         >
                             {templates.map((template) => (
                                 <motion.div key={template.id} variants={itemVariants}>
-                                    <GlassCard className="h-full flex flex-col p-0 overflow-hidden group hover:border-blue-500/30 transition-colors">
+                                    <Card className="h-full flex flex-col p-0 overflow-hidden group hover:border-blue-500/30 transition-colors bg-slate-900 border-slate-800">
                                         <div className="relative aspect-video bg-slate-800">
                                             <Image
                                                 src={template.original_image_url}
@@ -178,7 +178,7 @@ export default function MarketplacePage() {
                                                 <span>{template._count.variations} uses</span>
                                             </div>
                                         </div>
-                                    </GlassCard>
+                                    </Card>
                                 </motion.div>
                             ))}
                         </motion.div>
