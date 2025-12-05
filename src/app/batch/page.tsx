@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { GlassCard } from "@/components/ui/glass-card";
+import { Card } from "@/components/ui/card";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Loader2, UploadCloud, CheckCircle, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -58,7 +58,7 @@ export default function BatchPage() {
                         </p>
                     </div>
 
-                    <GlassCard className="p-8">
+                    <Card className="p-8">
                         <div className="border-2 border-dashed border-slate-700 rounded-xl p-12 text-center hover:border-blue-500/50 transition-colors bg-slate-800/20">
                             <input
                                 type="file"
@@ -113,7 +113,7 @@ export default function BatchPage() {
                         )}
 
                         {error && <div className="mt-6"><ErrorDisplay message={error} /></div>}
-                    </GlassCard>
+                    </Card>
                 </div>
             </main>
 
