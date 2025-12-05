@@ -1,0 +1,51 @@
+
+> copiedcatz@0.1.0 build
+> next build
+
+   ▲ Next.js 15.0.3
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/components/ui/glass-button.module.css
+Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+    at at (c:\Users\Stan Test\Documents\copiedcatz\node_modules\tailwindcss\dist\lib.js:38:1629)
+    at LazyResult.runOnRoot (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:329:16)
+    at LazyResult.runAsync (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:258:26)
+    at LazyResult.async (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:160:30)
+    at LazyResult.then (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:404:17)
+
+Import trace for requested module:
+./src/components/ui/glass-button.module.css
+./src/app/editor/new/page.tsx
+
+./src/components/ui/glass-card.module.css
+Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+    at at (c:\Users\Stan Test\Documents\copiedcatz\node_modules\tailwindcss\dist\lib.js:38:1629)
+    at LazyResult.runOnRoot (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:329:16)
+    at LazyResult.runAsync (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:258:26)
+    at LazyResult.async (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:160:30)
+    at LazyResult.then (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:404:17)
+
+Import trace for requested module:
+./src/components/ui/glass-card.module.css
+./src/components/ui/glass-card.tsx
+./src/app/use-cases/[slug]/page.tsx
+
+./src/components/ui/glass-card.module.css
+Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+    at at (c:\Users\Stan Test\Documents\copiedcatz\node_modules\tailwindcss\dist\lib.js:38:1629)
+    at LazyResult.runOnRoot (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:329:16)
+    at LazyResult.runAsync (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:258:26)
+    at LazyResult.async (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:160:30)
+    at LazyResult.then (c:\Users\Stan Test\Documents\copiedcatz\node_modules\next\node_modules\postcss\lib\lazy-result.js:404:17)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runNextTicks (node:internal/process/task_queues:69:3)
+    at process.processImmediate (node:internal/timers:453:9)
+
+Import trace for requested module:
+./src/components/ui/glass-card.module.css
+./src/app/editor/new/page.tsx
+
+
+> Build failed because of webpack errors
