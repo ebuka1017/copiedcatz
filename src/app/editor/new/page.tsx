@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Upload, Image as ImageIcon } from 'lucide-react';
-import { upload } from '@vercel/blob/client'; // Keep for now if needed, or remove? Better remove
 import { useExtraction } from '@/lib/hooks/use-extraction';
 import { ExtractionProgress } from '@/components/extraction-progress';
 import { createClient } from '@/lib/supabase/client';
@@ -34,12 +33,6 @@ export default function NewProjectPage() {
 
     const handleFileSelect = async (file: File) => {
         if (!file) return;
-
-        // Since we are using Supabase storage client-side, we should probably do the upload here
-        // But wait, the previous code I wrote used verifyAuth on server.
-        // Let's us the supabase client upload pattern I wrote in Step 276.
-        // Wait, I need to make sure I have the imports.
-        // I see createClient and useAuth imported.
 
         if (!user) {
             alert("Please log in to upload.");
@@ -148,7 +141,7 @@ export default function NewProjectPage() {
                         >
                             <ImageIcon className="w-5 h-5" />
                             Browse Files
-                        </button>
+                        </Button>
 
                         <input
                             ref={fileInputRef}

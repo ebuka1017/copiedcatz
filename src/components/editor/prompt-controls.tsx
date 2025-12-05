@@ -225,6 +225,6 @@ export function PromptControls() {
                     />
                 )}
             </div>
-        </div>
+        </Card>
     );
 }

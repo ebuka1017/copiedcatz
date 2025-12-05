@@ -53,7 +53,6 @@ export function Canvas() {
                         </div>
                     </div>
                 )}
-                )}
             </div>
         </Card>
     );

@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, CheckCircle2, Circle, AlertCircle } from 'lucide-react';
-import styles from './ui/glass-card.module.css';
+import { Card } from '@/components/ui/card';
 
 interface ExtractionProgressProps {
     progress: number;
@@ -40,7 +40,7 @@ export function ExtractionProgress({
     };
 
     return (
-        <div className={`${styles.card} p-8 max-w-md w-full mx-auto`}>
+        <Card className="p-8 max-w-md w-full mx-auto">
             <div className="text-center mb-8">
                 <h3 className="text-xl font-semibold mb-2">
                     {status === 'uploading' && 'Uploading Image...'}
@@ -82,8 +82,8 @@ export function ExtractionProgress({
                             )}
 
                             <span className={`capitalize ${catStatus === 'processing' ? 'font-medium text-blue-600' :
-                                    catStatus === 'completed' ? 'text-slate-700' :
-                                        'text-slate-400'
+                                catStatus === 'completed' ? 'text-slate-700' :
+                                    'text-slate-400'
                                 }`}>
                                 {category}
                             </span>
@@ -98,6 +98,6 @@ export function ExtractionProgress({
                     <span className="text-sm">Something went wrong. Please try again.</span>
                 </div>
             )}
-        </div>
+        </Card>
     );
 }
