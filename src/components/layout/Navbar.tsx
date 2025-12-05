@@ -9,8 +9,13 @@ export function Navbar() {
 
     return (
         <nav className="w-full p-6 flex justify-between items-center z-10 absolute top-0 left-0 right-0">
-            <Link href="/" className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-400 flex items-center gap-2">
-                CopiedCatz
+            <Link href="/" className="flex items-center gap-3 group">
+                <div className="relative w-10 h-10 overflow-hidden rounded-xl border border-white/10 shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
+                    <img src="/logo.png" alt="CopiedCatz Logo" className="object-cover w-full h-full" />
+                </div>
+                <span className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-400">
+                    CopiedCatz
+                </span>
             </Link>
             <div className="flex items-center gap-6">
                 <div className="hidden md:flex gap-6 text-sm font-medium text-slate-300">
