@@ -1,31 +1,23 @@
-import React, { useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Camera, Crop, Loader2 } from 'lucide-react';
-
-// Mock UI components since we can't import from src/ easily in extension build without config
-const Button = ({ children, onClick, disabled, className }: any) => (
-    <button
-        onClick={onClick}
-        disabled={disabled}
-        style={{
-            width: '100%',
-            padding: '12px',
+disabled = { disabled }
+style = {{
+    width: '100%',
+        padding: '12px',
             background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            opacity: disabled ? 0.7 : 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            fontWeight: 500,
+                color: 'white',
+                    border: 'none',
+                        borderRadius: '8px',
+                            cursor: disabled ? 'not-allowed' : 'pointer',
+                                opacity: disabled ? 0.7 : 1,
+                                    display: 'flex',
+                                        alignItems: 'center',
+                                            justifyContent: 'center',
+                                                gap: '8px',
+                                                    fontWeight: 500,
             ...className
-        }}
+}}
     >
-        {children}
-    </button>
+    { children }
+    </button >
 );
 
 function Popup() {

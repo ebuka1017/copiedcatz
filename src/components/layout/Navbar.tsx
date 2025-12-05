@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { Home, Mail, LogIn, UserPlus, LayoutDashboard, Store } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function Navbar() {
     const { user, loading } = useAuth();
@@ -34,7 +35,7 @@ export function Navbar() {
                 </div>
 
                 {!loading && (
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 items-center">
                         {user ? (
                             <Link href="/dashboard" className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/10 rounded-full backdrop-blur-md transition-all flex items-center gap-2">
                                 <LayoutDashboard size={16} />
@@ -52,6 +53,7 @@ export function Navbar() {
                                 </Link>
                             </>
                         )}
+                        <ThemeToggle />
                     </div>
                 )}
             </div>

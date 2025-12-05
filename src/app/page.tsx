@@ -46,17 +46,6 @@ export default function LandingPage() {
                 </button>
               </Link>
             </div>
-
-            <div className="pt-8 flex items-center gap-4 text-sm text-slate-500">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center overflow-hidden">
-                    <Image src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${i * 123}`} width={40} height={40} alt="User" />
-                  </div>
-                ))}
-              </div>
-              <p>Trusted by 10,000+ designers</p>
-            </div>
           </div>
 
           <div className="relative">

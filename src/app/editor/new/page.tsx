@@ -3,9 +3,11 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Upload, Image as ImageIcon } from 'lucide-react';
-import { upload } from '@vercel/blob/client';
+import { upload } from '@vercel/blob/client'; // Keep for now if needed, or remove? Better remove
 import { useExtraction } from '@/lib/hooks/use-extraction';
 import { ExtractionProgress } from '@/components/extraction-progress';
+import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/hooks/use-auth';
 import cardStyles from '@/components/ui/glass-card.module.css';
 import buttonStyles from '@/components/ui/glass-button.module.css';
 
@@ -28,37 +30,6 @@ export default function NewProjectPage() {
             alert('Failed to process image');
         }
     });
-
-    const handleFileSelect = async (file: File) => {
-        if (!file) return;
-
-        try {
-            // 1. Upload to Vercel Blob
-            const newBlob = await upload(file.name, file, {
-                access: 'public',
-                handleUploadUrl: '/api/upload/request',
-            });
-
-            // 2. Start extraction
-            // We need to pass the blob URL because we don't have the DB ID yet.
-            // The server will need to look up the upload by URL or create it if missing (but onUploadCompleted should handle creation).
-            // However, onUploadCompleted is async and might race.
-            // Ideally, we wait for onUploadCompleted? No, we can't.
-
-            // Actually, if we pass the URL to extract, extract can look it up.
-            // But we need to update extract route to accept url.
-            await startExtraction(newBlob.url);
-
-        } catch (error) {
-            console.error('Upload failed:', error);
-            alert('Upload failed');
-        }
-    };
-
-    const onDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
 
     const onDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
