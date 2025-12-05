@@ -130,7 +130,7 @@ export default function MarketplacePage() {
                             ))}
                         </div>
                     ) : error ? (
-                        <ErrorDisplay message={error} onRetry={fetchMarketplace} />
+                        <ErrorDisplay message={error} />
                     ) : templates.length === 0 ? (
                         <EmptyState
                             icon={Store}

@@ -121,7 +121,6 @@ export default function Dashboard() {
           ) : error ? (
             <ErrorDisplay
               message={error}
-              onRetry={fetchTemplates}
             />
           ) : templates.length === 0 ? (
             <EmptyState
