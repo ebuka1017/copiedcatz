@@ -17,6 +17,18 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing filepath' }, { status: 400 });
         }
 
+        // Ensure user exists locally (JIT Sync)
+        await db.user.upsert({
+            where: { id: user.id },
+            update: { last_login_at: new Date() },
+            create: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                last_login_at: new Date(),
+            }
+        });
+
         // Create upload record
         const upload = await db.upload.create({
             data: {
