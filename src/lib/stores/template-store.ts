@@ -97,6 +97,7 @@ interface TemplateState {
 
     // Remix
     remixTemplate: (templateId: string) => Promise<string>;
+    addVariation: (variation: Variation) => void;
 }
 
 // ============================================================================
@@ -267,6 +268,15 @@ export const useTemplateStore = create<TemplateState>()(
                                 state.template.variations = state.template.variations.filter(
                                     (v) => v.id !== variationId
                                 );
+                            }
+                        });
+                    },
+
+                    addVariation: (variation) => {
+                        set((state) => {
+                            if (state.template) {
+                                state.template.variations.push(variation);
+                                state.template.updated_at = new Date();
                             }
                         });
                     },

@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
-import { useTemplateStore } from '@/lib/stores/template-store';
-import { Download, Share2, Loader2 } from 'lucide-react';
+import { useTemplateStore, Variation } from '@/lib/stores/template-store';
+import { Download, Share2, Loader2, Sparkles, Scissors } from 'lucide-react';
 import styles from '@/components/ui/glass-card.module.css';
 import buttonStyles from '@/components/ui/glass-button.module.css';
+import { useState } from 'react';
 
 export function ImagePreview() {
-    const { template, isGenerating } = useTemplateStore();
+    const { template, isGenerating, addVariation } = useTemplateStore();
+    const [isProcessing, setIsProcessing] = useState(false);
 
     if (!template) return null;
 
@@ -15,6 +17,38 @@ export function ImagePreview() {
     const currentImage = template.variations.length > 0
         ? template.variations[template.variations.length - 1].image_url
         : template.original_image_url;
+
+    const handleTool = async (tool: 'upscale' | 'remove-bg') => {
+        if (!currentImage || isProcessing) return;
+        setIsProcessing(true);
+        try {
+            const res = await fetch(`/api/tools/${tool}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image_url: currentImage })
+            });
+            const data = await res.json();
+
+            if (data.url) {
+                const newVariation: Variation = {
+                    id: Math.random().toString(36).substring(7),
+                    image_url: data.url,
+                    seed: 0,
+                    modified_prompt: template.structured_prompt,
+                    generation_time_ms: 0,
+                    created_at: new Date()
+                };
+                addVariation(newVariation);
+            } else {
+                console.error(data.error);
+                // Optionally show error toast
+            }
+        } catch (error) {
+            console.error('Tool failed:', error);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     return (
         <div className={`${styles.card} h-full flex flex-col p-4 relative overflow-hidden`}>
@@ -42,6 +76,26 @@ export function ImagePreview() {
                 </div>
 
                 <div className="flex gap-2">
+                    <button
+                        onClick={() => handleTool('upscale')}
+                        disabled={isProcessing}
+                        className={`${buttonStyles.button} !py-2 !px-3 !text-sm !bg-purple-500/10 !text-purple-400 hover:!bg-purple-500/20 disabled:opacity-50`}
+                    >
+                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                        <span className="ml-2 hidden sm:inline">Enhance</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleTool('remove-bg')}
+                        disabled={isProcessing}
+                        className={`${buttonStyles.button} !py-2 !px-3 !text-sm !bg-red-500/10 !text-red-400 hover:!bg-red-500/20 disabled:opacity-50`}
+                    >
+                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Scissors className="w-4 h-4" />}
+                        <span className="ml-2 hidden sm:inline">Remove BG</span>
+                    </button>
+
+                    <div className="w-px h-8 bg-slate-800 mx-1" />
+
                     <button className={`${buttonStyles.button} !py-2 !px-3 !text-sm`}>
                         <Download className="w-4 h-4" />
                         Download
@@ -55,3 +109,4 @@ export function ImagePreview() {
         </div>
     );
 }
+

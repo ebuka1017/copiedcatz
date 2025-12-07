@@ -88,3 +88,21 @@ export interface GenerateStructuredPromptRequest {
 export interface GenerateStructuredPromptResponse {
     structured_prompt: StructuredPrompt;
 }
+
+export interface RemoveBackgroundRequest {
+    image_url?: string; // URL or Base64
+    image_file?: string; // Base64
+}
+
+export interface RemoveBackgroundResponse {
+    result_url: string;
+}
+
+export interface UpscaleRequest {
+    image_url?: string;
+    scale_factor: 2 | 4;
+}
+
+export interface UpscaleResponse {
+    result_url: string;
+}

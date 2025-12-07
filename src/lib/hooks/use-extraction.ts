@@ -30,7 +30,27 @@ export function useExtraction({ onComplete, onError }: UseExtractionProps = {}) 
                 throw new Error('Failed to start extraction');
             }
 
-            const { job_id } = await response.json();
+            const data = await response.json();
+            const { job_id, status: initialStatus, template_id } = data;
+
+            // Handle synchronous completion (Bria V2)
+            if (initialStatus === 'COMPLETED' && template_id) {
+                setStatus('completed');
+                setProgress(100);
+                // We need to fetch the template? Or just navigate.
+                // onComplete expects templateId.
+                // The store update is missing if we skip Pusher!
+                // We must fetch the template details or let `editor/[id]` page load it.
+                // The `onComplete` in `UploadModal` navigates to `/editor/${templateId}`.
+                // The Editor page loads the template by ID.
+                // So we don't strictly need to update the store here, as the page nav will do it.
+                onComplete?.(template_id);
+                return;
+            }
+
+            if (initialStatus === 'FAILED') {
+                throw new Error(data.error || 'Extraction failed');
+            }
 
             // 2. Subscribe to private Pusher channel
             const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
@@ -88,10 +108,17 @@ export function useExtraction({ onComplete, onError }: UseExtractionProps = {}) 
         }
     }, [onComplete, onError, setTemplate]);
 
+    const reset = useCallback(() => {
+        setStatus('idle');
+        setProgress(0);
+        setCurrentCategory('');
+    }, []);
+
     return {
         startExtraction,
         progress,
         status,
         currentCategory,
+        reset,
     };
 }

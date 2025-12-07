@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import { StructuredPrompt } from '@/lib/bria/types';
 import { StructuredPromptEditor } from '@/components/editor/StructuredPromptEditor';
-import { Settings, Code, Type } from 'lucide-react';
+import { MagicPromptDialog } from '@/components/editor/magic-prompt-dialog';
+import { Settings, Code, Type, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -79,6 +80,16 @@ export function PromptControls() {
                             >
                                 <Code className="w-4 h-4" />
                             </button>
+                            <div className="w-px h-4 bg-white/10 mx-1" />
+                            <MagicPromptDialog>
+                                <button
+                                    className="p-1.5 rounded-md transition-all hover:bg-white/10 text-blue-400 hover:text-blue-300"
+                                    title="Magic Prompt (AI)"
+                                    aria-label="Open Magic Prompt"
+                                >
+                                    <Sparkles className="w-4 h-4" />
+                                </button>
+                            </MagicPromptDialog>
                         </div>
                     </div>
                 </div>
@@ -197,22 +208,58 @@ export function PromptControls() {
                                 </div>
 
                                 {/* Camera (New) */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Camera Angle</label>
-                                    <select
-                                        value={prompt.photographic_characteristics?.camera_angle || ''}
-                                        onChange={(e) => handleNestedUpdate('photographic_characteristics', 'camera_angle', e.target.value)}
-                                        className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
-                                    >
-                                        <option value="" disabled>Select Angle</option>
-                                        <option value="Eye Level">Eye Level</option>
-                                        <option value="Low Angle">Low Angle</option>
-                                        <option value="High Angle">High Angle</option>
-                                        <option value="Bird's Eye">Bird's Eye</option>
-                                        <option value="Dutch Angle">Dutch Angle</option>
-                                        <option value="Close-up">Close-up</option>
-                                        <option value="Wide Shot">Wide Shot</option>
-                                    </select>
+                                <div className="space-y-4 pt-4 border-t border-slate-800">
+                                    <h3 className="text-sm font-semibold text-slate-300">Camera Characteristics</h3>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-medium text-slate-400">Camera Angle</label>
+                                        <select
+                                            value={prompt.photographic_characteristics?.camera_angle || ''}
+                                            onChange={(e) => handleNestedUpdate('photographic_characteristics', 'camera_angle', e.target.value)}
+                                            className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                        >
+                                            <option value="" disabled>Select Angle</option>
+                                            <option value="Eye Level">Eye Level</option>
+                                            <option value="Low Angle">Low Angle</option>
+                                            <option value="High Angle">High Angle</option>
+                                            <option value="Bird's Eye">Bird's Eye</option>
+                                            <option value="Dutch Angle">Dutch Angle</option>
+                                            <option value="Close-up">Close-up</option>
+                                            <option value="Wide Shot">Wide Shot</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-medium text-slate-400">Focal Length</label>
+                                            <select
+                                                value={prompt.photographic_characteristics?.lens_focal_length || ''}
+                                                onChange={(e) => handleNestedUpdate('photographic_characteristics', 'lens_focal_length', e.target.value)}
+                                                className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                            >
+                                                <option value="" disabled>Lens</option>
+                                                <option value="Wide Angle">Wide Angle</option>
+                                                <option value="Standard">Standard (50mm)</option>
+                                                <option value="Telephoto">Telephoto (85mm+)</option>
+                                                <option value="Macro">Macro</option>
+                                                <option value="Fisheye">Fisheye</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-medium text-slate-400">Depth of Field</label>
+                                            <select
+                                                value={prompt.photographic_characteristics?.depth_of_field || ''}
+                                                onChange={(e) => handleNestedUpdate('photographic_characteristics', 'depth_of_field', e.target.value)}
+                                                className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                            >
+                                                <option value="" disabled>DoF</option>
+                                                <option value="Shallow">Shallow (Blurry BG)</option>
+                                                <option value="Medium">Medium</option>
+                                                <option value="Deep">Deep (Everything in focus)</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </>
                         )}
@@ -225,6 +272,6 @@ export function PromptControls() {
                     />
                 )}
             </div>
-        </Card>
+        </Card >
     );
 }

@@ -60,67 +60,62 @@ export async function POST(req: Request) {
             },
         });
 
-        // Call Bria API with webhook callback
+        // Call Bria V2 API (Synchronous for now to ensure completion)
         const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${upload.filepath}`;
-        const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/bria-callback`;
 
-        const apiKey = process.env.BRIA_API_TOKEN || process.env.BRIA_API_KEY;
+        // We use the Bria V2 client which handles the endpoint correctly
+        // We use sync=true (implied by awaiting) or rely on the client's polling if it handles async
+        // The generateStructuredPrompt in client.ts handles looking for status_url, so it behaves synchronously for us.
 
-        if (apiKey) {
-            const maxRetries = 3;
-            let attempt = 0;
-            let success = false;
+        try {
+            // Dynamic import to avoid circular dep issues if any, though likely fine to static import
+            // better to use the client function we verified
+            const curModule = await import('@/lib/bria/client');
+            const result = await curModule.generateStructuredPrompt({
+                prompt: undefined, // Image only extraction
+                images: [imageUrl]
+            });
 
-            while (attempt < maxRetries && !success) {
-                try {
-                    const briaResponse = await fetch('https://api.bria.ai/v1/inspire/extract', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${apiKey}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            image_url: imageUrl,
-                            categories: [
-                                'scene',
-                                'lighting',
-                                'camera',
-                                'composition',
-                                'color',
-                                'style',
-                                'technical',
-                            ],
-                            webhook_url: callbackUrl,
-                            metadata: {
-                                job_id,
-                                user_id: user.id,
-                            },
-                        }),
-                    });
-
-                    if (!briaResponse.ok) {
-                        throw new Error(`Bria API request failed: ${await briaResponse.text()}`);
-                    }
-
-                    success = true;
-
-                } catch (err) {
-                    attempt++;
-                    console.error(`Bria API attempt ${attempt} failed:`, err);
-                    if (attempt === maxRetries) {
-                        // Mark job as failed in DB if we want to be thorough, but for now just log
-                        console.error('All Bria API retries failed');
-                    } else {
-                        // Exponential backoff: 1s, 2s, 4s
-                        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
-                    }
+            // Create Template from result
+            const template = await db.template.create({
+                data: {
+                    user_id: user.id,
+                    name: `Extraction ${new Date().toLocaleString()}`,
+                    original_image_url: imageUrl,
+                    structured_prompt: result as any, // Verify this casts correctly to JSON
+                    is_public: false,
+                    tags: [],
+                    variations: { create: [] }
                 }
-            }
-        } else {
-            console.warn('Skipping Bria API call - BRIA_API_KEY not set');
-        }
+            });
 
-        return NextResponse.json({ job_id });
+            // Update job
+            await db.extractionJob.update({
+                where: { id: job_id },
+                data: {
+                    status: 'COMPLETED',
+                    progress: 100,
+                }
+            });
+
+            return NextResponse.json({
+                job_id,
+                status: 'COMPLETED',
+                template_id: template.id
+            });
+
+        } catch (err: any) {
+            console.error('Bria V2 Extraction failed:', err);
+            await db.extractionJob.update({
+                where: { id: job_id },
+                data: {
+                    status: 'FAILED',
+                    error: err.message
+                }
+            });
+            // Return failed status so client knows
+            return NextResponse.json({ job_id, status: 'FAILED', error: err.message }, { status: 500 });
+        }
 
     } catch (error) {
         console.error('Extraction start error:', error);

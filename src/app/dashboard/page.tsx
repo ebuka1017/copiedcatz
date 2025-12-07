@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from "next/link";
 import Image from "next/image";
+import { UploadModal } from "@/components/dashboard/upload-modal";
 import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -96,12 +97,12 @@ export default function Dashboard() {
               <h1 className="text-3xl font-bold mb-2">My Templates</h1>
               <p className="text-slate-400">Manage your visual DNA collection</p>
             </div>
-            <Link href="/editor/new">
+            <UploadModal>
               <button className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold flex items-center gap-2 transition-colors">
                 <Plus className="w-5 h-5" />
                 New Template
               </button>
-            </Link>
+            </UploadModal>
           </div>
 
           <UsageStats />
@@ -123,13 +124,23 @@ export default function Dashboard() {
               message={error}
             />
           ) : templates.length === 0 ? (
-            <EmptyState
-              icon={Plus}
-              title="No templates yet"
-              description="Create your first template to start generating variations."
-              actionLabel="Create Template"
-              actionHref="/editor/new"
-            />
+            <div className="flex flex-col items-center justify-center p-12 text-center space-y-6 bg-slate-900/20 border border-slate-800/50 rounded-2xl backdrop-blur-sm">
+              <div className="w-16 h-16 bg-slate-800/50 rounded-2xl flex items-center justify-center text-slate-400">
+                <Plus size={32} />
+              </div>
+              <div className="space-y-2 max-w-md">
+                <h3 className="text-xl font-semibold text-white">No templates yet</h3>
+                <p className="text-slate-400">Create your first template to start generating variations.</p>
+              </div>
+              <div className="pt-2">
+                <UploadModal>
+                  <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold flex items-center gap-2 text-white text-sm transition-colors">
+                    <Plus className="w-4 h-4" />
+                    Create Template
+                  </button>
+                </UploadModal>
+              </div>
+            </div>
           ) : (
             <motion.div
               className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -178,9 +189,9 @@ export default function Dashboard() {
             </motion.div>
           )}
         </div>
-      </main>
+      </main >
 
       <Footer />
-    </div>
+    </div >
   );
 }

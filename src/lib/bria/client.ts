@@ -28,7 +28,8 @@ async function pollStatus(statusUrl: string): Promise<any> {
             return data; // The result is usually nested or merged here, need to check docs carefully. 
             // Docs say "Use the Status Service to track the request's progress until it reaches a completed state."
             // Usually the result is in the `result` field of the completed status response.
-            return data;
+            // Return the result object if it exists (common pattern), otherwise return the whole data
+            return data.result || data;
         } else if (data.status === 'failed') {
             throw new Error(`Bria task failed: ${JSON.stringify(data)}`);
         }
@@ -96,4 +97,56 @@ export async function generateStructuredPrompt(request: GenerateStructuredPrompt
     }
 
     return data;
+}
+
+export async function removeBackground(imageUrl: string): Promise<string> {
+    if (!BRIA_API_TOKEN) throw new Error('BRIA_API_TOKEN is missing');
+
+    const response = await fetch(`${BRIA_API_URL}/image/edit/remove_background`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'api_token': BRIA_API_TOKEN,
+        },
+        body: JSON.stringify({ image_url: imageUrl }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Bria API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.status_url) {
+        const result = await pollStatus(data.status_url);
+        // Result typically contains url or image_url
+        return result.url || result.image_url || result.result_url;
+    }
+    return data.url || data.result_url;
+}
+
+export async function upscale(imageUrl: string, scale: 2 | 4 = 2): Promise<string> {
+    if (!BRIA_API_TOKEN) throw new Error('BRIA_API_TOKEN is missing');
+
+    const response = await fetch(`${BRIA_API_URL}/image/edit/increase_resolution`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'api_token': BRIA_API_TOKEN,
+        },
+        body: JSON.stringify({
+            image_url: imageUrl,
+            desired_increase: scale
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Bria API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.status_url) {
+        const result = await pollStatus(data.status_url);
+        return result.url || result.image_url || result.result_url;
+    }
+    return data.url || data.result_url;
 }
