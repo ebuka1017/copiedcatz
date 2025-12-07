@@ -71,7 +71,8 @@ export function UploadModal({ children }: UploadModalProps) {
             });
 
             if (!uploadRes.ok) {
-                throw new Error('Failed to create upload record');
+                const errorData = await uploadRes.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Failed to create upload record');
             }
 
             const { id: uploadId } = await uploadRes.json();

@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error('Upload record creation failed:', error);
         return NextResponse.json(
-            { error: 'Failed to create upload record' },
+            { error: error instanceof Error ? error.message : 'Failed to create upload record' },
             { status: 500 }
         );
     }
