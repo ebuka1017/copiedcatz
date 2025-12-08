@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { Home, Mail, LogIn, UserPlus, LayoutDashboard, Store } from "lucide-react";
@@ -12,7 +13,13 @@ export function Navbar() {
         <nav className="w-full p-6 flex justify-between items-center z-10 absolute top-0 left-0 right-0">
             <Link href="/" className="flex items-center gap-3 group">
                 <div className="relative w-10 h-10 overflow-hidden rounded-xl border border-white/10 shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
-                    <img src="/logo.png" alt="CopiedCatz Logo" className="object-cover w-full h-full" />
+                    <Image
+                        src="/logo.png"
+                        alt="CopiedCatz Logo"
+                        fill={true}
+                        className="object-cover"
+                        sizes="40px"
+                    />
                 </div>
                 <span className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-400">
                     CopiedCatz

@@ -26,9 +26,16 @@ export async function GET(
         const { blob_id } = await params;
 
         // Fetch upload metadata
-        const upload = await db.upload.findUnique({
-            where: { id: blob_id },
-        });
+        // Fetch upload metadata
+        const { data: upload, error: findError } = await db.from('Upload')
+            .select('*')
+            .eq('id', blob_id)
+            .single();
+
+        if (findError && findError.code !== 'PGRST116') {
+            console.error('Upload find error:', findError);
+            // Proceed to 404 checks
+        }
 
         if (!upload) {
             return NextResponse.json(

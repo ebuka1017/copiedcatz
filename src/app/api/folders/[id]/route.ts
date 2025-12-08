@@ -13,17 +13,21 @@ export async function GET(
         }
 
         const { id } = await params;
-        const folder = await db.folder.findUnique({
-            where: { id },
-            include: {
-                children: true,
-                // We don't include templates by default to keep payload light, 
-                // but client might need them. Let's include them for now as it's a detail view.
-                templates: true
-            },
-        });
 
-        if (!folder) {
+        // Supabase select with relations.
+        // children (Folder) - self relation on parent_id
+        // templates (Template) - relation on folder_id
+        const { data: folder, error: fetchError } = await db.from('Folder')
+            .select(`
+                *,
+                children:Folder!parent_id(*),
+                templates:Template(*)
+            `)
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !folder) {
+            if (fetchError && fetchError.code !== 'PGRST116') console.error(fetchError);
             return NextResponse.json({ error: 'Folder not found' }, { status: 404 });
         }
 
@@ -53,11 +57,12 @@ export async function PATCH(
         const { name, parent_id } = body;
 
         // Verify ownership
-        const existing = await db.folder.findUnique({
-            where: { id },
-        });
+        const { data: existing, error: findError } = await db.from('Folder')
+            .select('user_id')
+            .eq('id', id)
+            .single();
 
-        if (!existing) {
+        if (findError || !existing) {
             return NextResponse.json({ error: 'Folder not found' }, { status: 404 });
         }
 
@@ -72,13 +77,16 @@ export async function PATCH(
             }
         }
 
-        const updated = await db.folder.update({
-            where: { id },
-            data: {
+        const { data: updated, error: updateError } = await db.from('Folder')
+            .update({
                 name,
                 parent_id,
-            },
-        });
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (updateError) throw updateError;
 
         return NextResponse.json(updated);
     } catch (error) {
@@ -100,11 +108,12 @@ export async function DELETE(
         const { id } = await params;
 
         // Verify ownership
-        const existing = await db.folder.findUnique({
-            where: { id },
-        });
+        const { data: existing, error: findError } = await db.from('Folder')
+            .select('user_id')
+            .eq('id', id)
+            .single();
 
-        if (!existing) {
+        if (findError || !existing) {
             return NextResponse.json({ error: 'Folder not found' }, { status: 404 });
         }
 
@@ -113,12 +122,11 @@ export async function DELETE(
         }
 
         // Delete folder
-        // Schema handles cascade:
-        // - Subfolders: Deleted (onDelete: Cascade)
-        // - Templates: Preserved, folder_id set to null (onDelete: SetNull)
-        await db.folder.delete({
-            where: { id },
-        });
+        const { error: deleteError } = await db.from('Folder')
+            .delete()
+            .eq('id', id);
+
+        if (deleteError) throw deleteError;
 
         return NextResponse.json({ message: 'Folder deleted successfully' });
     } catch (error) {

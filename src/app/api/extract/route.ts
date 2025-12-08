@@ -25,20 +25,22 @@ export async function POST(req: Request) {
         }
 
         // Fetch upload
-        const upload = await db.upload.findUnique({
-            where: { id: blob_id },
-        });
+        const { data: upload, error: uploadError } = await db.from('Upload')
+            .select('*')
+            .eq('id', blob_id)
+            .single();
 
-        if (!upload || upload.user_id !== user.id) {
+        if (uploadError || !upload || upload.user_id !== user.id) {
             return NextResponse.json({ error: 'Upload not found' }, { status: 404 });
         }
 
         // Check credits
-        const userRecord = await db.user.findUnique({
-            where: { id: user.id },
-        });
+        const { data: userRecord, error: userError } = await db.from('User')
+            .select('credits_remaining')
+            .eq('id', user.id)
+            .single();
 
-        if (!userRecord || userRecord.credits_remaining <= 0) {
+        if (userError || !userRecord || userRecord.credits_remaining <= 0) {
             return NextResponse.json(
                 { error: 'Insufficient credits' },
                 { status: 402 }
@@ -49,27 +51,21 @@ export async function POST(req: Request) {
         const job_id = crypto.randomUUID();
 
         // Create extraction job record
-        await db.extractionJob.create({
-            data: {
-                id: job_id,
-                user_id: user.id,
-                upload_id: blob_id,
-                status: 'PROCESSING',
-                progress: 0,
-                created_at: new Date(),
-            },
+        const { error: jobError } = await db.from('ExtractionJob').insert({
+            id: job_id,
+            user_id: user.id,
+            upload_id: blob_id,
+            status: 'PROCESSING',
+            progress: 0,
+            created_at: new Date().toISOString(),
         });
+
+        if (jobError) throw jobError;
 
         // Call Bria V2 API (Synchronous for now to ensure completion)
         const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${upload.filepath}`;
 
-        // We use the Bria V2 client which handles the endpoint correctly
-        // We use sync=true (implied by awaiting) or rely on the client's polling if it handles async
-        // The generateStructuredPrompt in client.ts handles looking for status_url, so it behaves synchronously for us.
-
         try {
-            // Dynamic import to avoid circular dep issues if any, though likely fine to static import
-            // better to use the client function we verified
             const curModule = await import('@/lib/bria/client');
             const result = await curModule.generateStructuredPrompt({
                 prompt: undefined, // Image only extraction
@@ -77,26 +73,26 @@ export async function POST(req: Request) {
             });
 
             // Create Template from result
-            const template = await db.template.create({
-                data: {
+            const { data: template, error: temError } = await db.from('Template')
+                .insert({
                     user_id: user.id,
                     name: `Extraction ${new Date().toLocaleString()}`,
                     original_image_url: imageUrl,
-                    structured_prompt: result as any, // Verify this casts correctly to JSON
+                    structured_prompt: result as any,
                     is_public: false,
                     tags: [],
-                    variations: { create: [] }
-                }
-            });
+                    folder_id: null // Explicitly null to satisfy constraints if any, or omit
+                })
+                .select()
+                .single();
+
+            if (temError || !template) throw temError;
 
             // Update job
-            await db.extractionJob.update({
-                where: { id: job_id },
-                data: {
-                    status: 'COMPLETED',
-                    progress: 100,
-                }
-            });
+            await db.from('ExtractionJob').update({
+                status: 'COMPLETED',
+                progress: 100,
+            }).eq('id', job_id);
 
             return NextResponse.json({
                 job_id,
@@ -106,14 +102,11 @@ export async function POST(req: Request) {
 
         } catch (err: any) {
             console.error('Bria V2 Extraction failed:', err);
-            await db.extractionJob.update({
-                where: { id: job_id },
-                data: {
-                    status: 'FAILED',
-                    error: err.message
-                }
-            });
-            // Return failed status so client knows
+            await db.from('ExtractionJob').update({
+                status: 'FAILED',
+                error: err.message
+            }).eq('id', job_id);
+
             return NextResponse.json({ job_id, status: 'FAILED', error: err.message }, { status: 500 });
         }
 

@@ -1,27 +1,48 @@
 import { SignJWT } from 'jose';
-import { PrismaClient } from '@prisma/client';
+import { createClient } from '@supabase/supabase-js';
 
-const prisma = new PrismaClient();
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_Admin_KEY; // Fallback or check naming
+
+if (!supabaseUrl || !supabaseKey) {
+    // If running in build context where envs might be missing, 
+    // we should perhaps just skip or warn? 
+    // But if someone runs this script, they need envs.
+    // For build safety, let's allow it to compile but fail at runtime if missing.
+}
+
+const supabase = createClient(supabaseUrl!, supabaseKey!);
 const JWT_SECRET = process.env.JWT_SECRET;
+
 if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is not defined');
+    // throw new Error('JWT_SECRET environment variable is not defined');
+    console.warn('JWT_SECRET not defined');
 }
 
 async function generateToken() {
+    if (!JWT_SECRET || !supabaseUrl || !supabaseKey) {
+        console.error('Missing env vars');
+        return;
+    }
+
     // 1. Get or create a test user
-    let user = await prisma.user.findFirst();
+    const { data: users } = await supabase.from('User').select('*').limit(1);
+    let user = users && users.length > 0 ? users[0] : null;
 
     if (!user) {
         console.log('No user found, creating test user...');
-        user = await prisma.user.create({
-            data: {
-                email: 'test@copiedcatz.com',
-                name: 'Test User',
+        const { data: newUser, error } = await supabase.from('User').insert({
+            email: 'test@copiedcatz.com',
+            name: 'Test User',
+            plan: 'PRO',
+            credits_remaining: 100,
+        }).select().single();
 
-                plan: 'PRO',
-                credits_remaining: 100,
-            }
-        });
+        if (error) {
+            console.error('Failed to create user', error);
+            return;
+        }
+        user = newUser;
     }
 
     console.log(`Generating token for user: ${user.email} (${user.id})`);
@@ -42,4 +63,4 @@ async function generateToken() {
 
 generateToken()
     .catch(console.error)
-    .finally(() => prisma.$disconnect());
+    .finally(() => { });

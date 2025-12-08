@@ -15,25 +15,30 @@ export async function POST(
         const { id } = await params;
 
         // Fetch original template
-        const originalTemplate = await db.template.findUnique({
-            where: { id },
-        });
+        const { data: originalTemplate, error: findError } = await db.from('Template')
+            .select('*')
+            .eq('id', id)
+            .single();
 
-        if (!originalTemplate) {
+        if (findError || !originalTemplate) {
             return NextResponse.json({ error: 'Template not found' }, { status: 404 });
         }
 
         // Create new template as a copy
-        const newTemplate = await db.template.create({
-            data: {
+        const { data: newTemplate, error: createError } = await db.from('Template')
+            .insert({
                 name: `Remix of ${originalTemplate.name}`,
                 original_image_url: originalTemplate.original_image_url,
-                structured_prompt: originalTemplate.structured_prompt as any, // Prisma JSON type handling
+                structured_prompt: originalTemplate.structured_prompt,
                 user_id: user.id,
                 is_public: false, // Private by default
+                folder_id: null,
                 tags: originalTemplate.tags,
-            },
-        });
+            })
+            .select()
+            .single();
+
+        if (createError) throw createError;
 
         return NextResponse.json(newTemplate);
 

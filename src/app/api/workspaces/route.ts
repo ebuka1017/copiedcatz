@@ -9,44 +9,35 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        // Find workspaces where user is owner OR member
-        const workspaces = await db.workspace.findMany({
-            where: {
-                OR: [
-                    { owner_id: user.id },
-                    {
-                        members: {
-                            some: {
-                                user_id: user.id,
-                            },
-                        },
-                    },
-                ],
-            },
-            include: {
-                members: {
-                    include: {
-                        user: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                            },
-                        },
-                    },
-                },
-                owner: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                    },
-                },
-            },
-            orderBy: {
-                created_at: 'desc',
-            },
-        });
+        // 1. Get workspaces where user is a member
+        const { data: memberships } = await db.from('WorkspaceMember')
+            .select('workspace_id')
+            .eq('user_id', user.id);
+
+        const memberWorkspaceIds = memberships?.map(m => m.workspace_id) || [];
+
+        // 2. Fetch workspaces where owner OR member
+        // Construct OR filter: owner_id.eq.USER_ID,id.in.(...ids)
+        // Note: usage of explicit syntax string for OR
+        let query = db.from('Workspace')
+            .select(`
+                *,
+                members:WorkspaceMember(
+                    user:User(id, name, email)
+                ),
+                owner:User(id, name, email)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (memberWorkspaceIds.length > 0) {
+            query = query.or(`owner_id.eq.${user.id},id.in.(${memberWorkspaceIds.join(',')})`);
+        } else {
+            query = query.eq('owner_id', user.id);
+        }
+
+        const { data: workspaces, error } = await query;
+
+        if (error) throw error;
 
         return NextResponse.json(workspaces);
     } catch (error) {
@@ -69,25 +60,30 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'Missing workspace name' }, { status: 400 });
         }
 
-        // Create workspace and add owner as member in a transaction
-        const workspace = await db.$transaction(async (tx) => {
-            const ws = await tx.workspace.create({
-                data: {
-                    name,
-                    owner_id: user.id,
-                },
+        // Create workspace
+        const { data: workspace, error: createError } = await db.from('Workspace')
+            .insert({
+                name,
+                owner_id: user.id
+            })
+            .select()
+            .single();
+
+        if (createError || !workspace) throw createError;
+
+        // Add owner as ADMIN member
+        const { error: memberError } = await db.from('WorkspaceMember')
+            .insert({
+                workspace_id: workspace.id,
+                user_id: user.id,
+                role: 'ADMIN'
             });
 
-            await tx.workspaceMember.create({
-                data: {
-                    workspace_id: ws.id,
-                    user_id: user.id,
-                    role: 'ADMIN',
-                },
-            });
-
-            return ws;
-        });
+        if (memberError) {
+            // Rollback attempt (best effort)
+            await db.from('Workspace').delete().eq('id', workspace.id);
+            throw memberError;
+        }
 
         return NextResponse.json(workspace);
     } catch (error) {

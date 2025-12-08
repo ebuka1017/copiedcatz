@@ -12,38 +12,45 @@ export async function GET() {
         }
 
         // Fetch usage stats
-        const [
-            totalTemplates,
-            totalVariations,
-            creditsUsed
-        ] = await Promise.all([
-            db.template.count({ where: { user_id: user.id } }),
-            db.variation.count({ where: { template: { user_id: user.id } } }),
-            db.usageLog.aggregate({
-                where: { user_id: user.id },
-                _sum: { credits_used: true }
-            })
+        // 1. Total Templates
+        const templatesQuery = db.from('Template')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+
+        // 2. Total Variations (using inner join on Template)
+        const variationsQuery = db.from('Variation')
+            .select('id, Template!inner(user_id)', { count: 'exact', head: true })
+            .eq('Template.user_id', user.id);
+
+        // 3. Credits Used (Sum)
+        const creditsQuery = db.from('UsageLog')
+            .select('credits_used')
+            .eq('user_id', user.id);
+
+        const [templatesRes, variationsRes, creditsRes] = await Promise.all([
+            templatesQuery,
+            variationsQuery,
+            creditsQuery
         ]);
 
+        const totalTemplates = templatesRes.count || 0;
+        const totalVariations = variationsRes.count || 0;
+        const creditsUsed = creditsRes.data?.reduce((sum, log) => sum + (log.credits_used || 0), 0) || 0;
+
         // Get recent activity
-        const recentActivity = await db.usageLog.findMany({
-            where: { user_id: user.id },
-            orderBy: { created_at: 'desc' },
-            take: 5,
-            select: {
-                action: true,
-                created_at: true,
-                credits_used: true
-            }
-        });
+        const { data: recentActivity } = await db.from('UsageLog')
+            .select('action, created_at, credits_used')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
 
         return NextResponse.json({
             stats: {
                 templates: totalTemplates,
                 variations: totalVariations,
-                credits: creditsUsed._sum.credits_used || 0
+                credits: creditsUsed
             },
-            recentActivity
+            recentActivity: recentActivity || []
         });
     } catch (error) {
         console.error('Analytics fetch error:', error);

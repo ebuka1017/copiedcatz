@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { db } from '@/lib/db';
-import { createAdminClient } from '@/lib/supabase/server';
+// import { createAdminClient } from '@/lib/supabase/server';
 
 /**
  * Request a signed upload URL for image upload
@@ -44,8 +44,9 @@ export async function POST(req: Request) {
         const filepath = `${user.id}/${blob_id}`; // Supabase paths: user_id/blob_id
 
         // 4. Generate signed upload URL (expires in 5 minutes)
-        const supabase = createAdminClient();
-        const { data, error } = await supabase
+        // 4. Generate signed upload URL (expires in 5 minutes)
+        // db is the admin client, so we reuse it
+        const { data, error } = await db
             .storage
             .from('uploads')
             .createSignedUploadUrl(filepath);
@@ -56,16 +57,16 @@ export async function POST(req: Request) {
         }
 
         // 5. Store metadata in database
-        await db.upload.create({
-            data: {
-                id: blob_id,
-                user_id: user.id,
-                filepath,
-                status: 'PENDING',
-                expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-                created_at: new Date(),
-            },
+        const { error: dbError } = await db.from('Upload').insert({
+            id: blob_id,
+            user_id: user.id,
+            filepath,
+            status: 'PENDING',
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString(),
         });
+
+        if (dbError) throw dbError;
 
         // 6. Return signed URL and blob ID
         return NextResponse.json({

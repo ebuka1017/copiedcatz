@@ -26,11 +26,20 @@ export async function POST(req: Request) {
         // Channel format: private-job-{job_id}
         const jobId = channelName.replace('private-job-', '');
 
-        const job = await db.extractionJob.findUnique({
-            where: { id: jobId },
-        });
+        const { data: job, error: findError } = await db.from('ExtractionJob')
+            .select('user_id')
+            .eq('id', jobId)
+            .single();
 
-        if (!job || job.user_id !== user.id) {
+        if (findError || !job) {
+            // If not found, it might be 404, or if user_id doesn't match effectively it's forbidden if we check ownership next.
+            // Original logic checked existence first.
+            // If generic error, logging it might be good.
+            if (findError && findError.code !== 'PGRST116') console.error(findError);
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        if (job.user_id !== user.id) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 

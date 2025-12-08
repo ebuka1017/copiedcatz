@@ -13,20 +13,22 @@ export async function POST(req: Request) {
         const { template_id, structured_prompt, seed } = await req.json();
 
         // Verify template ownership
-        const template = await db.template.findUnique({
-            where: { id: template_id },
-        });
+        const { data: template, error: temError } = await db.from('Template')
+            .select('user_id')
+            .eq('id', template_id)
+            .single();
 
-        if (!template || template.user_id !== user.id) {
+        if (temError || !template || template.user_id !== user.id) {
             return NextResponse.json({ error: 'Template not found' }, { status: 404 });
         }
 
         // Check credits
-        const userRecord = await db.user.findUnique({
-            where: { id: user.id },
-        });
+        const { data: userRecord, error: userError } = await db.from('User')
+            .select('credits_remaining')
+            .eq('id', user.id)
+            .single();
 
-        if (!userRecord || userRecord.credits_remaining <= 0) {
+        if (userError || !userRecord || userRecord.credits_remaining <= 0) {
             return NextResponse.json(
                 { error: 'Insufficient credits' },
                 { status: 402 }
@@ -60,24 +62,26 @@ export async function POST(req: Request) {
         }
 
         // Store variation
-        const variation = await db.variation.create({
-            data: {
+        const { data: variation, error: varError } = await db.from('Variation')
+            .insert({
                 template_id,
                 image_url: imageUrl,
                 seed,
                 modified_prompt: structured_prompt,
                 generation_time_ms: generationTime,
-                created_at: new Date(),
-            },
-        });
+                created_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+
+        if (varError) throw varError;
 
         // Deduct credit
-        await db.user.update({
-            where: { id: user.id },
-            data: {
-                credits_remaining: { decrement: 1 },
-            },
-        });
+        // Manual decrement since no atomic increment in JS SDK update (without RPC)
+        const newCredits = userRecord.credits_remaining - 1;
+        await db.from('User')
+            .update({ credits_remaining: newCredits })
+            .eq('id', user.id);
 
         return NextResponse.json(variation);
 

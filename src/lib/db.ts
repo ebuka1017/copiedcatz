@@ -1,14 +1,8 @@
-import 'server-only';
-import { PrismaClient } from '@prisma/client';
-import { validateEnv } from './env';
+import { createAdminClient } from '@/lib/supabase/server';
 
-// Validate environment variables on startup
-validateEnv();
+// Exporting a singleton admin client for server-side operations
+// Note: In Supabase, we typically create a new client per request to handle auth correctly,
+// but for admin tasks (bypassing RLS) we can use a service role client.
+// However, the `createAdminClient` function in server.ts creates a new instance.
 
-const globalForPrisma = globalThis as unknown as {
-    prisma: PrismaClient | undefined;
-};
-
-export const db = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
+export const db = createAdminClient();

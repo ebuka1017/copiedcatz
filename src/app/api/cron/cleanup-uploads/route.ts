@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { createAdminClient } from '@/lib/supabase/server';
+// import { db } from '@/lib/db'; // Removed duplicate
 
 export const dynamic = 'force-dynamic'; // Ensure this route is not cached
 
@@ -16,49 +16,41 @@ export async function GET(req: Request) {
 
     try {
         // 1. Find expired uploads
-        const expiredUploads = await db.upload.findMany({
-            where: {
-                expires_at: {
-                    lt: new Date(),
-                },
-            },
-            take: 100, // Process in batches
-        });
+        const { data: expiredUploads, error: findError } = await db.from('Upload')
+            .select('*')
+            .lt('expires_at', new Date().toISOString())
+            .limit(100);
 
-        if (expiredUploads.length === 0) {
+        if (findError) throw findError;
+
+        if (!expiredUploads || expiredUploads.length === 0) {
             return NextResponse.json({ message: 'No expired uploads found' });
         }
 
         console.log(`Found ${expiredUploads.length} expired uploads to clean up.`);
 
         // 2. Delete from Supabase Storage
-        const supabase = createAdminClient();
         const filePaths = expiredUploads.map((u) => u.filepath);
 
-        const { error: storageError } = await supabase.storage
+        // Note: db exported from @/lib/db is an admin client, so we can use it for storage too if needed,
+        // but the original code created a new admin client. Since db IS an admin client, we can reuse it.
+        // However, looking at imports, we already have createAdminClient import.
+        // Let's use db since it's cleaner.
+
+        const { error: storageError } = await db.storage
             .from('uploads')
             .remove(filePaths);
 
         if (storageError) {
             console.error('Failed to delete files from storage:', storageError);
-            // We continue to delete from DB? Or retry?
-            // If we fail to delete file, we shouldn't delete DB record or we'll leak storage.
-            // But if file doesn't exist, we should delete DB record.
-            // Let's assume partial failure is possible.
         }
 
         // 3. Delete from Database
-        // We delete all found records. If storage delete failed, we might leave orphans in storage.
-        // Better to delete DB records so we don't keep trying to process them?
-        // Or maybe we should only delete DB records if storage delete succeeded?
-        // For simplicity in this MVP cron: delete DB records.
-        const { count } = await db.upload.deleteMany({
-            where: {
-                id: {
-                    in: expiredUploads.map((u) => u.id),
-                },
-            },
-        });
+        const { count, error: deleteError } = await db.from('Upload')
+            .delete({ count: 'exact' })
+            .in('id', expiredUploads.map((u) => u.id));
+
+        if (deleteError) throw deleteError;
 
         return NextResponse.json({
             message: 'Cleanup successful',

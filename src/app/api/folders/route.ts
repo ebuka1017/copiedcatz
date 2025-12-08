@@ -12,20 +12,27 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const parent_id = searchParams.get('parent_id');
 
-        const whereClause: any = {
-            user_id: user.id,
-        };
+        let query = db.from('Folder')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('name', { ascending: true });
 
         if (parent_id) {
-            whereClause.parent_id = parent_id;
+            query = query.eq('parent_id', parent_id);
+        } else {
+            // If parent_id is missing/null, should we filter for root folders?
+            // Prisma `where` clause: if parent_id is passed, it adds it.
+            // If searchParams has it, we use it. If not, we don't add it?
+            // "const parent_id = searchParams.get('parent_id');"
+            // If parent_id is null (not in url), previous code didn't add it to whereClause. 
+            // So it listed ALL folders?
+            // "if (parent_id) { whereClause.parent_id = parent_id; }"
+            // Yes, it listed all folders if no parent_id.
         }
 
-        const folders = await db.folder.findMany({
-            where: whereClause,
-            orderBy: {
-                name: 'asc',
-            },
-        });
+        const { data: folders, error } = await query;
+
+        if (error) throw error;
 
         return NextResponse.json(folders);
     } catch (error) {
@@ -54,13 +61,16 @@ export async function POST(req: Request) {
             );
         }
 
-        const folder = await db.folder.create({
-            data: {
+        const { data: folder, error } = await db.from('Folder')
+            .insert({
                 name,
                 parent_id: parent_id || null,
                 user_id: user.id,
-            },
-        });
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
 
         return NextResponse.json(folder, { status: 201 });
     } catch (error) {

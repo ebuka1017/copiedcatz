@@ -13,12 +13,12 @@ export async function GET(
         }
 
         const { id } = await params;
-        const template = await db.template.findUnique({
-            where: { id },
-            include: { variations: true },
-        });
+        const { data: template, error: findError } = await db.from('Template')
+            .select('*, variations:Variation(*)')
+            .eq('id', id)
+            .single();
 
-        if (!template) {
+        if (findError || !template) {
             return NextResponse.json({ message: 'Template not found' }, { status: 404 });
         }
 
@@ -47,11 +47,12 @@ export async function PATCH(
         const body = await req.json();
 
         // Verify ownership
-        const existing = await db.template.findUnique({
-            where: { id },
-        });
+        const { data: existing, error: findError } = await db.from('Template')
+            .select('user_id')
+            .eq('id', id)
+            .single();
 
-        if (!existing) {
+        if (findError || !existing) {
             return NextResponse.json({ message: 'Template not found' }, { status: 404 });
         }
 
@@ -59,18 +60,20 @@ export async function PATCH(
             return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
         }
 
-        const updated = await db.template.update({
-            where: { id },
-            data: {
+        const { data: updated, error: updateError } = await db.from('Template')
+            .update({
                 name: body.name,
                 structured_prompt: body.structured_prompt,
                 is_public: body.is_public,
                 folder_id: body.folder_id,
                 tags: body.tags,
-                updated_at: new Date(),
-            },
-            include: { variations: true },
-        });
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', id)
+            .select('*, variations:Variation(*)')
+            .single();
+
+        if (updateError) throw updateError;
 
         return NextResponse.json(updated);
     } catch (error) {
@@ -92,11 +95,12 @@ export async function DELETE(
         const { id } = await params;
 
         // Verify ownership
-        const existing = await db.template.findUnique({
-            where: { id },
-        });
+        const { data: existing, error: findError } = await db.from('Template')
+            .select('user_id')
+            .eq('id', id)
+            .single();
 
-        if (!existing) {
+        if (findError || !existing) {
             return NextResponse.json({ message: 'Template not found' }, { status: 404 });
         }
 
@@ -104,9 +108,11 @@ export async function DELETE(
             return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
         }
 
-        await db.template.delete({
-            where: { id },
-        });
+        const { error: deleteError } = await db.from('Template')
+            .delete()
+            .eq('id', id);
+
+        if (deleteError) throw deleteError;
 
         return NextResponse.json({ message: 'Deleted successfully' });
     } catch (error) {
