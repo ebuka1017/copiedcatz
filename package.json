@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:extension": "vite build --config vite.config.extension.ts",
-    "postinstall": "prisma generate"
+    "build:extension": "vite build --config vite.config.extension.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

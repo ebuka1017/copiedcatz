@@ -16,6 +16,9 @@
         "rootDir": ".",
         "types": [
             "chrome"
+        ],
+        "typeRoots": [
+            "../node_modules/@types"
         ]
     },
     "include": [
