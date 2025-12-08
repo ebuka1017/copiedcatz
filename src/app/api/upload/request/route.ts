@@ -44,7 +44,6 @@ export async function POST(req: Request) {
         const filepath = `${user.id}/${blob_id}`; // Supabase paths: user_id/blob_id
 
         // 4. Generate signed upload URL (expires in 5 minutes)
-        // 4. Generate signed upload URL (expires in 5 minutes)
         // db is the admin client, so we reuse it
         const { data, error } = await db
             .storage

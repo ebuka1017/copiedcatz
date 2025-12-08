@@ -18,7 +18,6 @@ export async function POST(req: Request) {
         }
 
         // Ensure user exists locally (JIT Sync)
-        // Ensure user exists locally (JIT Sync)
         const { error: upsertError } = await db.from('User').upsert(
             {
                 id: user.id,
