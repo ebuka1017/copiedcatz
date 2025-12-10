@@ -1,34 +1,22 @@
+import { createClient } from '@/lib/supabase/client';
 import { GenerateImageRequest, GenerateImageResponse, GenerateStructuredPromptRequest, GenerateStructuredPromptResponse } from './types';
 
-const BRIA_API_URL = 'https://engine.prod.bria-api.com/v2';
-const BRIA_API_TOKEN = process.env.BRIA_API_TOKEN || process.env.BRIA_API_KEY;
-
-if (!BRIA_API_TOKEN) {
-    console.warn('BRIA_API_TOKEN (or BRIA_API_KEY) is not defined. Bria API calls will fail.');
-}
+const supabase = createClient();
 
 async function pollStatus(statusUrl: string): Promise<any> {
     const maxAttempts = 60; // 1 minute timeout roughly
     const interval = 1000; // 1 second
 
     for (let i = 0; i < maxAttempts; i++) {
-        const response = await fetch(statusUrl, {
-            headers: {
-                'api_token': BRIA_API_TOKEN!,
-            },
+        const { data, error } = await supabase.functions.invoke('generate-image', {
+            body: { action: 'check_status', data: { status_url: statusUrl } }
         });
 
-        if (!response.ok) {
-            throw new Error(`Failed to poll status: ${response.statusText}`);
+        if (error) {
+            throw new Error(`Failed to poll status: ${error.message}`);
         }
 
-        const data = await response.json();
-
         if (data.status === 'completed') {
-            return data; // The result is usually nested or merged here, need to check docs carefully. 
-            // Docs say "Use the Status Service to track the request's progress until it reaches a completed state."
-            // Usually the result is in the `result` field of the completed status response.
-            // Return the result object if it exists (common pattern), otherwise return the whole data
             return data.result || data;
         } else if (data.status === 'failed') {
             throw new Error(`Bria task failed: ${JSON.stringify(data)}`);
@@ -41,25 +29,14 @@ async function pollStatus(statusUrl: string): Promise<any> {
 }
 
 export async function generateImageV2(request: GenerateImageRequest): Promise<GenerateImageResponse> {
-    if (!BRIA_API_TOKEN) throw new Error('BRIA_API_TOKEN is missing');
-
-    const response = await fetch(`${BRIA_API_URL}/image/generate`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'api_token': BRIA_API_TOKEN,
-        },
-        body: JSON.stringify(request),
+    const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { action: 'generate_image', data: request }
     });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Bria API error: ${response.status} - ${errorText}`);
-    }
+    if (error) throw new Error(`generateImageV2 failed: ${error.message}`);
 
-    const data = await response.json();
-
-    // If sync is requested (custom flag) or if we want to auto-poll
+    // If sync is requested or if we see a status_url, we might want to poll?
+    // The previous implementation polled if `request.sync` was true.
     if (request.sync && data.status_url) {
         return await pollStatus(data.status_url);
     }
@@ -68,31 +45,14 @@ export async function generateImageV2(request: GenerateImageRequest): Promise<Ge
 }
 
 export async function generateStructuredPrompt(request: GenerateStructuredPromptRequest): Promise<GenerateStructuredPromptResponse> {
-    if (!BRIA_API_TOKEN) throw new Error('BRIA_API_TOKEN is missing');
-
-    const response = await fetch(`${BRIA_API_URL}/structured_prompt/generate`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'api_token': BRIA_API_TOKEN,
-        },
-        body: JSON.stringify(request),
+    const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { action: 'generate_structured_prompt', data: request }
     });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Bria API error: ${response.status} - ${errorText}`);
-    }
-
-    // Structured prompt generation might also be async? Docs say "It only returns the JSON string". 
-    // But the overview says "Bria API v2 endpoints process requests asynchronously by default."
-    // Let's assume it might return a status_url too.
-    const data = await response.json();
+    if (error) throw new Error(`generateStructuredPrompt failed: ${error.message}`);
 
     if (data.status_url) {
         const result = await pollStatus(data.status_url);
-        // The result of structured prompt gen should be the structured prompt itself.
-        // We might need to extract it from the result.
         return result;
     }
 
@@ -100,50 +60,26 @@ export async function generateStructuredPrompt(request: GenerateStructuredPrompt
 }
 
 export async function removeBackground(imageUrl: string): Promise<string> {
-    if (!BRIA_API_TOKEN) throw new Error('BRIA_API_TOKEN is missing');
-
-    const response = await fetch(`${BRIA_API_URL}/image/edit/remove_background`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'api_token': BRIA_API_TOKEN,
-        },
-        body: JSON.stringify({ image_url: imageUrl }),
+    const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { action: 'remove_background', data: { image_url: imageUrl } }
     });
 
-    if (!response.ok) {
-        throw new Error(`Bria API error: ${response.status}`);
-    }
+    if (error) throw new Error(`removeBackground failed: ${error.message}`);
 
-    const data = await response.json();
     if (data.status_url) {
         const result = await pollStatus(data.status_url);
-        // Result typically contains url or image_url
         return result.url || result.image_url || result.result_url;
     }
     return data.url || data.result_url;
 }
 
 export async function upscale(imageUrl: string, scale: 2 | 4 = 2): Promise<string> {
-    if (!BRIA_API_TOKEN) throw new Error('BRIA_API_TOKEN is missing');
-
-    const response = await fetch(`${BRIA_API_URL}/image/edit/increase_resolution`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'api_token': BRIA_API_TOKEN,
-        },
-        body: JSON.stringify({
-            image_url: imageUrl,
-            desired_increase: scale
-        }),
+    const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { action: 'increase_resolution', data: { image_url: imageUrl, desired_increase: scale } }
     });
 
-    if (!response.ok) {
-        throw new Error(`Bria API error: ${response.status}`);
-    }
+    if (error) throw new Error(`upscale failed: ${error.message}`);
 
-    const data = await response.json();
     if (data.status_url) {
         const result = await pollStatus(data.status_url);
         return result.url || result.image_url || result.result_url;

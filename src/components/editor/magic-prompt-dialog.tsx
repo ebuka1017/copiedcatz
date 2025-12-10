@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { generateStructuredPrompt } from '@/lib/bria/client';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Loader2, Wand2 } from 'lucide-react';
@@ -23,26 +24,8 @@ export function MagicPromptDialog({ children }: MagicPromptDialogProps) {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch('/api/generate/bria/v2', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'generate_structured_prompt',
-                    data: { prompt: prompt }
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to generate prompt');
-            }
-
-            const data = await response.json();
-
-            // Data might be wrapped, checking structure
-            // Based on client.ts, it returns { structured_prompt: ... } or result
-            const structuredPrompt = data.structured_prompt || data;
-
-            setStructuredPrompt(structuredPrompt);
+            const result = await generateStructuredPrompt({ prompt: prompt });
+            setStructuredPrompt(result as any); // Cast as needed or ensure types match
             setOpen(false);
             setPrompt('');
 

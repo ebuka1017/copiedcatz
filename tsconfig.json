@@ -39,6 +39,7 @@
   "exclude": [
     "node_modules",
     "extension",
-    "vite.config.extension.ts"
+    "vite.config.extension.ts",
+    "supabase"
   ]
 }
