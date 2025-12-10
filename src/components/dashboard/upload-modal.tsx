@@ -49,36 +49,25 @@ export function UploadModal({ children }: UploadModalProps) {
         }
 
         try {
-            // 1. Upload to Supabase Storage
             const supabase = createClient();
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${user.id}/${Math.random().toString(36).substring(7)}.${fileExt}`;
+            const formData = new FormData();
+            formData.append('file', file);
 
-            const { data, error } = await supabase.storage
-                .from('uploads')
-                .upload(fileName, file);
-
-            if (error) {
-                console.error('Supabase upload error:', error);
-                throw error;
-            }
-
-            // 2. Create Upload Record in DB
-            const uploadRes = await fetch('/api/uploads', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filepath: fileName }),
+            const { data: uploadData, error: uploadError } = await supabase.functions.invoke('storage-upload', {
+                body: formData,
             });
 
-            if (!uploadRes.ok) {
-                const errorData = await uploadRes.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Failed to create upload record');
+            if (uploadError) {
+                console.error('Upload Error:', uploadError);
+                throw new Error(uploadError.message || 'Failed to upload file');
             }
 
-            const { id: uploadId } = await uploadRes.json();
+            if (!uploadData || !uploadData.id) {
+                throw new Error('Invalid response from upload service');
+            }
 
-            // 3. Start extraction with the Upload ID
-            await startExtraction(uploadId);
+            // Start extraction with the Upload ID
+            await startExtraction(uploadData.id);
 
         } catch (error) {
             console.error('Upload failed:', error);
@@ -120,7 +109,7 @@ export function UploadModal({ children }: UploadModalProps) {
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-xl bg-slate-900 border-slate-800 text-white p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-xl bg-card border-border text-foreground p-0 overflow-hidden">
                 <DialogTitle className="sr-only">Upload Image</DialogTitle>
                 <DialogDescription className="sr-only">Upload an image to extract its Visual DNA</DialogDescription>
 
@@ -135,10 +124,10 @@ export function UploadModal({ children }: UploadModalProps) {
                 ) : (
                     <div className="p-8">
                         <div className="mb-6 text-center">
-                            <h2 className="text-2xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                            <h2 className="text-2xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
                                 New Extraction
                             </h2>
-                            <p className="text-slate-400">
+                            <p className="text-muted-foreground">
                                 Upload an image to decode its Visual DNA
                             </p>
                             {uploadError && (

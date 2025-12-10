@@ -57,8 +57,8 @@ body {
 
 /* Optional Dark Mode Overrides (if user wants to toggle, but default is Light) */
 @media (prefers-color-scheme: dark) {
-  /* Commenting out auto-dark mode to enforce the requested Light Theme primarily, 
-     but leaving structure for manual toggle if needed later */
+  /* Enforcing Light Mode by default as per request. 
+     Uncomment below to re-enable system dark mode support. */
   /*
   :root {
     --background: #020617;

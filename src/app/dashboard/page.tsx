@@ -86,7 +86,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 to-slate-900 text-white">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
       <main className="flex-grow pt-32 pb-16 px-6">
@@ -94,8 +94,8 @@ export default function Dashboard() {
 
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold mb-2">My Templates</h1>
-              <p className="text-slate-400">Manage your visual DNA collection</p>
+              <h1 className="text-3xl font-bold mb-2 text-foreground">My Templates</h1>
+              <p className="text-muted-foreground">Manage your visual DNA collection</p>
             </div>
             <UploadModal>
               <button className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold flex items-center gap-2 transition-colors">
