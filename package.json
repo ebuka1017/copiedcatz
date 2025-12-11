@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:extension": "vite build --config vite.config.extension.ts"
+    "build:extension": "vite build --config vite.config.extension.ts",
+    "build:deploy": "supabase db push && supabase functions deploy --force && next build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
@@ -33,6 +34,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "supabase": "^2.0.0",
     "@types/chrome": "^0.1.32",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^20",
