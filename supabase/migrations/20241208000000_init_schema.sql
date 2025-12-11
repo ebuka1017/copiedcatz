@@ -2,15 +2,36 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Enums
-CREATE TYPE "Plan" AS ENUM ('FREE', 'STARTER', 'PRO', 'ENTERPRISE');
-CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'CANCELED', 'PAST_DUE', 'TRIALING');
-CREATE TYPE "UploadStatus" AS ENUM ('PENDING', 'PROCESSED', 'FAILED', 'EXPIRED');
-CREATE TYPE "ExtractionStatus" AS ENUM ('PROCESSING', 'COMPLETED', 'FAILED');
-CREATE TYPE "WorkspaceRole" AS ENUM ('ADMIN', 'EDITOR', 'VIEWER');
-CREATE TYPE "UsageAction" AS ENUM ('EXTRACTION', 'GENERATION', 'API_CALL');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'Plan') THEN
+        CREATE TYPE "Plan" AS ENUM ('FREE', 'STARTER', 'PRO', 'ENTERPRISE');
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'SubscriptionStatus') THEN
+        CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'CANCELED', 'PAST_DUE', 'TRIALING');
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'UploadStatus') THEN
+        CREATE TYPE "UploadStatus" AS ENUM ('PENDING', 'PROCESSED', 'FAILED', 'EXPIRED');
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ExtractionStatus') THEN
+        CREATE TYPE "ExtractionStatus" AS ENUM ('PROCESSING', 'COMPLETED', 'FAILED');
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'WorkspaceRole') THEN
+        CREATE TYPE "WorkspaceRole" AS ENUM ('ADMIN', 'EDITOR', 'VIEWER');
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'UsageAction') THEN
+        CREATE TYPE "UsageAction" AS ENUM ('EXTRACTION', 'GENERATION', 'API_CALL');
+    END IF;
+END
+$$;
 
 -- Users
-CREATE TABLE "User" (
+CREATE TABLE IF NOT EXISTS "User" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "email" TEXT NOT NULL UNIQUE,
     "name" TEXT,
@@ -26,7 +47,7 @@ CREATE TABLE "User" (
 );
 
 -- Uploads
-CREATE TABLE "Upload" (
+CREATE TABLE IF NOT EXISTS "Upload" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "user_id" UUID NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
     "filepath" TEXT NOT NULL,
@@ -36,7 +57,7 @@ CREATE TABLE "Upload" (
 );
 
 -- Extraction Jobs
-CREATE TABLE "ExtractionJob" (
+CREATE TABLE IF NOT EXISTS "ExtractionJob" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "user_id" UUID NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
     "upload_id" UUID NOT NULL REFERENCES "Upload"("id") ON DELETE CASCADE,
@@ -48,7 +69,7 @@ CREATE TABLE "ExtractionJob" (
 );
 
 -- Folders
-CREATE TABLE "Folder" (
+CREATE TABLE IF NOT EXISTS "Folder" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "user_id" UUID NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
     "name" TEXT NOT NULL,
@@ -57,7 +78,7 @@ CREATE TABLE "Folder" (
 );
 
 -- Templates
-CREATE TABLE "Template" (
+CREATE TABLE IF NOT EXISTS "Template" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "user_id" UUID NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
     "name" TEXT NOT NULL,
@@ -71,7 +92,7 @@ CREATE TABLE "Template" (
 );
 
 -- Variations
-CREATE TABLE "Variation" (
+CREATE TABLE IF NOT EXISTS "Variation" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "template_id" UUID NOT NULL REFERENCES "Template"("id") ON DELETE CASCADE,
     "image_url" TEXT NOT NULL,
@@ -82,7 +103,7 @@ CREATE TABLE "Variation" (
 );
 
 -- Workspaces
-CREATE TABLE "Workspace" (
+CREATE TABLE IF NOT EXISTS "Workspace" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "name" TEXT NOT NULL,
     "owner_id" UUID NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
@@ -91,7 +112,7 @@ CREATE TABLE "Workspace" (
 );
 
 -- Workspace Members
-CREATE TABLE "WorkspaceMember" (
+CREATE TABLE IF NOT EXISTS "WorkspaceMember" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "workspace_id" UUID NOT NULL REFERENCES "Workspace"("id") ON DELETE CASCADE,
     "user_id" UUID NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
@@ -101,7 +122,7 @@ CREATE TABLE "WorkspaceMember" (
 );
 
 -- Usage Logs
-CREATE TABLE "UsageLog" (
+CREATE TABLE IF NOT EXISTS "UsageLog" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "user_id" UUID NOT NULL, 
     "action" "UsageAction" NOT NULL,
@@ -111,7 +132,7 @@ CREATE TABLE "UsageLog" (
 );
 
 -- Stripe Events
-CREATE TABLE "StripeEvent" (
+CREATE TABLE IF NOT EXISTS "StripeEvent" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "stripe_event_id" TEXT NOT NULL UNIQUE,
     "type" TEXT NOT NULL,
