@@ -134,6 +134,21 @@ export function DialogTitle({ children, className }: { children: React.ReactNode
     );
 }
 
+export function DialogHeader({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+    return (
+        <div
+            className={cn(
+                "flex flex-col space-y-1.5 text-center sm:text-left",
+                className
+            )}
+            {...props}
+        />
+    )
+}
+
 export function DialogDescription({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
         <p className={cn("text-sm text-slate-400", className)}>
