@@ -105,7 +105,7 @@ export function DialogContent({ children, className }: { children: React.ReactNo
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
                             transition={{ duration: 0.2 }}
                             className={cn(
-                                "relative w-full bg-slate-900 border border-slate-800 rounded-lg shadow-lg pointer-events-auto",
+                                "relative w-full bg-background text-foreground border border-border rounded-lg shadow-lg pointer-events-auto",
                                 className
                             )}
                         >
@@ -113,7 +113,7 @@ export function DialogContent({ children, className }: { children: React.ReactNo
                                 onClick={() => setOpen(false)}
                                 className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
                             >
-                                <X className="h-4 w-4 text-slate-400" />
+                                <X className="h-4 w-4 text-muted-foreground" />
                                 <span className="sr-only">Close</span>
                             </button>
                             {children}
@@ -151,7 +151,7 @@ export function DialogHeader({
 
 export function DialogDescription({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
-        <p className={cn("text-sm text-slate-400", className)}>
+        <p className={cn("text-sm text-muted-foreground", className)}>
             {children}
         </p>
     );

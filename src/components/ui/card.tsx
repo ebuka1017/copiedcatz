@@ -11,7 +11,7 @@ export function Card({ children, className, onClick, ...props }: CardProps) {
         <div
             onClick={onClick}
             className={cn(
-                "bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm",
+                "bg-card text-card-foreground border border-border rounded-2xl overflow-hidden shadow-sm",
                 className
             )}
             {...props}
