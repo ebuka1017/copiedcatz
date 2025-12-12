@@ -42,7 +42,7 @@ export function Controls() {
               px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all
               ${activeCategory === cat.key
                                 ? 'bg-blue-600 text-white shadow-lg'
-                                : 'text-slate-400 hover:bg-slate-800'}
+                                : 'text-slate-300 hover:bg-slate-700 hover:text-slate-100'}
             `}
                     >
                         <span className="mr-2">{cat.icon}</span>
@@ -64,9 +64,9 @@ export function Controls() {
                     {activeCategory === 'objects' ? (
                         <div className="space-y-6">
                             {(template.structured_prompt.objects || []).map((obj, index) => (
-                                <div key={index} className="p-4 bg-slate-800/50 rounded-xl border border-slate-700 space-y-4">
+                                <div key={index} className="p-4 bg-slate-800/50 rounded-xl border border-slate-600 space-y-4">
                                     <div className="flex justify-between items-center">
-                                        <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+                                        <h4 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
                                             Subject {index + 1}
                                         </h4>
                                         <button
@@ -102,7 +102,7 @@ export function Controls() {
 
                                     {Object.entries(obj).map(([field, val]) => (
                                         <div key={field} className="space-y-1">
-                                            <label className="text-xs font-medium text-slate-500 capitalize">
+                                            <label className="text-xs font-medium text-slate-300 capitalize">
                                                 {field.replace(/_/g, ' ')}
                                             </label>
                                             <input
@@ -118,7 +118,7 @@ export function Controls() {
                                                     const newObj = { ...obj, [field]: e.target.value };
                                                     updatePrompt('objects', index as any, newObj);
                                                 }}
-                                                className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm"
+                                                className="w-full px-3 py-2 rounded-lg border border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                                             />
                                         </div>
                                     ))}
@@ -128,7 +128,7 @@ export function Controls() {
                     ) : (
                         Object.entries(template.structured_prompt[activeCategory] || {}).map(([key, value]) => (
                             <div key={key} className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 capitalize">
+                                <label className="text-sm font-medium text-slate-200 capitalize">
                                     {key.replace(/_/g, ' ')}
                                 </label>
 
@@ -138,7 +138,7 @@ export function Controls() {
                                             onClick={() => updatePrompt(activeCategory, key, !value)}
                                             className={`
                       w-12 h-6 rounded-full transition-colors relative
-                      ${value ? 'bg-blue-500' : 'bg-slate-200 dark:bg-slate-700'}
+                      ${value ? 'bg-blue-500' : 'bg-slate-600'}
                     `}
                                         >
                                             <div
@@ -148,7 +148,7 @@ export function Controls() {
                       `}
                                             />
                                         </button>
-                                        <span className="text-sm text-slate-500">
+                                        <span className="text-sm text-slate-300">
                                             {value ? 'Enabled' : 'Disabled'}
                                         </span>
                                     </div>
@@ -157,7 +157,7 @@ export function Controls() {
                                         {value.map((item, i) => (
                                             <span
                                                 key={i}
-                                                className="px-2 py-1 text-xs bg-slate-100 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700"
+                                                className="px-2 py-1 text-xs bg-slate-800 text-slate-200 rounded-md border border-slate-600"
                                             >
                                                 {item}
                                             </span>
@@ -169,7 +169,7 @@ export function Controls() {
                                         type="text"
                                         value={value as string}
                                         onChange={(e) => updatePrompt(activeCategory, key, e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 rounded-lg border border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                                     />
                                 )}
                             </div>

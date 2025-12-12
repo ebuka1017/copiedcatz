@@ -124,13 +124,13 @@ export default function Dashboard() {
               message={error}
             />
           ) : templates.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center space-y-6 bg-slate-900/20 border border-slate-800/50 rounded-2xl backdrop-blur-sm">
-              <div className="w-16 h-16 bg-slate-800/50 rounded-2xl flex items-center justify-center text-slate-400">
+            <div className="flex flex-col items-center justify-center p-12 text-center space-y-6 bg-slate-800/50 border border-slate-700 rounded-2xl">
+              <div className="w-16 h-16 bg-slate-700 rounded-2xl flex items-center justify-center text-slate-300">
                 <Plus size={32} />
               </div>
               <div className="space-y-2 max-w-md">
                 <h3 className="text-xl font-semibold text-white">No templates yet</h3>
-                <p className="text-slate-400">Create your first template to start generating variations.</p>
+                <p className="text-slate-300">Create your first template to start generating variations.</p>
               </div>
               <div className="pt-2">
                 <UploadModal>
@@ -176,10 +176,10 @@ export default function Dashboard() {
                     </div>
                     <div className="p-5 flex-grow flex flex-col">
                       <h3 className="font-bold text-lg mb-1 truncate">{template.name}</h3>
-                      <p className="text-sm text-slate-400 mb-4">
+                      <p className="text-sm text-slate-300 mb-4">
                         Last updated: {new Date(template.updated_at).toLocaleDateString()}
                       </p>
-                      <div className="mt-auto flex items-center justify-between text-xs text-slate-500">
+                      <div className="mt-auto flex items-center justify-between text-xs text-slate-400">
                         <span>{template.variations?.length || 0} variations</span>
                       </div>
                     </div>

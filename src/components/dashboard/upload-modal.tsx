@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Upload, Image as ImageIcon, X } from 'lucide-react';
 import { useExtraction } from '@/lib/hooks/use-extraction';
 import { ExtractionProgress } from '@/components/extraction-progress';
-import { createClient } from '@/lib/supabase/client';
+import { callEdgeFunction } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -49,18 +49,14 @@ export function UploadModal({ children }: UploadModalProps) {
         }
 
         try {
-            const supabase = createClient();
             const formData = new FormData();
             formData.append('file', file);
 
-            const { data: uploadData, error: uploadError } = await supabase.functions.invoke('storage-upload', {
+            // Use callEdgeFunction which properly handles auth headers
+            const uploadData = await callEdgeFunction('storage-upload', {
                 body: formData,
+                method: 'POST'
             });
-
-            if (uploadError) {
-                console.error('Upload Error:', uploadError);
-                throw new Error(uploadError.message || 'Failed to upload file');
-            }
 
             if (!uploadData || !uploadData.id) {
                 throw new Error('Invalid response from upload service');

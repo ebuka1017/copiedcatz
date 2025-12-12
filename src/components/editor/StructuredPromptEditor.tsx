@@ -56,11 +56,11 @@ export function StructuredPromptEditor({ initialPrompt, onChange, className }: S
     };
 
     return (
-        <Card className={`flex flex-col h-full bg-slate-900 border-slate-800 ${className}`}>
+        <Card className={`flex flex-col h-full bg-slate-900 border-slate-700 ${className}`}>
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <FileJson className="w-5 h-5 text-blue-400" />
-                    <h3 className="font-semibold text-slate-900 dark:text-white">Structured Prompt</h3>
+                    <h3 className="font-semibold text-white">Structured Prompt</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="secondary" onClick={formatJson} disabled={!isValid} className="text-xs h-8">
@@ -73,23 +73,23 @@ export function StructuredPromptEditor({ initialPrompt, onChange, className }: S
                 <textarea
                     value={jsonString}
                     onChange={handleJsonChange}
-                    className={`w-full h-full min-h-[400px] bg-slate-50 dark:bg-slate-900/50 border rounded-lg p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 transition-all ${isValid
-                        ? 'border-slate-200 dark:border-slate-700 focus:ring-blue-500/50'
-                        : 'border-red-500/50 focus:ring-red-500/50'
+                    className={`w-full h-full min-h-[400px] bg-slate-800 border rounded-lg p-4 font-mono text-sm text-slate-100 placeholder:text-slate-500 resize-none focus:outline-none focus:ring-2 transition-all ${isValid
+                        ? 'border-slate-600 focus:ring-blue-500 focus:border-blue-500'
+                        : 'border-red-500 focus:ring-red-500'
                         }`}
                     spellCheck={false}
                     placeholder="// Enter structured prompt JSON here..."
                 />
 
                 {!isValid && error && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-start gap-2 text-red-400 text-xs backdrop-blur-md">
+                    <div className="absolute bottom-4 left-4 right-4 bg-red-950/80 border border-red-700 rounded-lg p-3 flex items-start gap-2 text-red-200 text-xs">
                         <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                         <span>{error}</span>
                     </div>
                 )}
             </div>
 
-            <div className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+            <div className="mt-4 text-xs text-slate-300">
                 <p>Edit the JSON to refine the image generation. Changes are applied automatically when valid.</p>
             </div>
         </Card>

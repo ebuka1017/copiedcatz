@@ -7,11 +7,17 @@ export const dynamic = 'force-dynamic'; // Ensure this route is not cached
 export async function GET(req: Request) {
     // Verify cron secret to prevent unauthorized access
     const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        // Allow Vercel Cron if configured, or manual trigger with secret
-        // For now, we'll just log a warning if no secret, but in prod you MUST secure this.
-        // console.warn('Cron triggered without valid secret');
-        // return new NextResponse('Unauthorized', { status: 401 });
+    const cronSecret = process.env.CRON_SECRET;
+
+    // SECURITY: Always verify cron secret in production
+    if (!cronSecret) {
+        console.error('CRON_SECRET not configured - endpoint is INSECURE');
+        return new NextResponse('Server misconfiguration', { status: 500 });
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+        console.warn('Unauthorized cron attempt detected');
+        return new NextResponse('Unauthorized', { status: 401 });
     }
 
     try {

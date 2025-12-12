@@ -126,22 +126,22 @@ export function PromptControls() {
                             <>
                                 {/* Short Description */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Description</label>
+                                    <label className="text-sm font-medium text-slate-200">Description</label>
                                     <textarea
                                         value={prompt.short_description || ''}
                                         onChange={(e) => handleSimpleUpdate('short_description', e.target.value)}
-                                        className="w-full h-32 bg-slate-900/20 border border-slate-200/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
+                                        className="w-full h-32 bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-colors"
                                         placeholder="Describe the image content..."
                                     />
                                 </div>
 
                                 {/* Background */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Background Setting</label>
+                                    <label className="text-sm font-medium text-slate-200">Background Setting</label>
                                     <textarea
                                         value={prompt.background_setting || ''}
                                         onChange={(e) => handleSimpleUpdate('background_setting', e.target.value)}
-                                        className="w-full h-24 bg-slate-900/20 border border-slate-200/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
+                                        className="w-full h-24 bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-colors"
                                         placeholder="Describe the background..."
                                     />
                                 </div>
@@ -150,24 +150,24 @@ export function PromptControls() {
                             <>
                                 {/* Style / Medium */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Style & Medium</label>
+                                    <label className="text-sm font-medium text-slate-200">Style & Medium</label>
                                     <input
                                         type="text"
                                         value={prompt.style_medium || ''}
                                         onChange={(e) => handleSimpleUpdate('style_medium', e.target.value)}
-                                        className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                        className="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-sm text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                                         placeholder="e.g., Oil painting, Realistic photo"
                                     />
                                 </div>
 
                                 {/* Lighting */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Lighting</label>
+                                    <label className="text-sm font-medium text-slate-200">Lighting</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <select
                                             value={prompt.lighting?.conditions || ''}
                                             onChange={(e) => handleNestedUpdate('lighting', 'conditions', e.target.value)}
-                                            className="bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                            className="bg-slate-800 border border-slate-600 rounded-lg p-2 text-sm text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none cursor-pointer transition-colors"
                                         >
                                             <option value="" disabled>Condition</option>
                                             <option value="Natural">Natural</option>
@@ -181,7 +181,7 @@ export function PromptControls() {
                                         <select
                                             value={prompt.lighting?.direction || ''}
                                             onChange={(e) => handleNestedUpdate('lighting', 'direction', e.target.value)}
-                                            className="bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                            className="bg-slate-800 border border-slate-600 rounded-lg p-2 text-sm text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none cursor-pointer transition-colors"
                                         >
                                             <option value="" disabled>Direction</option>
                                             <option value="Front">Front</option>
@@ -197,26 +197,26 @@ export function PromptControls() {
 
                                 {/* Aesthetics */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Mood & Atmosphere</label>
+                                    <label className="text-sm font-medium text-slate-200">Mood & Atmosphere</label>
                                     <input
                                         type="text"
                                         value={prompt.aesthetics?.mood_atmosphere || ''}
                                         onChange={(e) => handleNestedUpdate('aesthetics', 'mood_atmosphere', e.target.value)}
-                                        className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                        className="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-sm text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                                         placeholder="e.g., Melancholic, Cheerful"
                                     />
                                 </div>
 
                                 {/* Camera (New) */}
-                                <div className="space-y-4 pt-4 border-t border-slate-800">
-                                    <h3 className="text-sm font-semibold text-slate-300">Camera Characteristics</h3>
+                                <div className="space-y-4 pt-4 border-t border-slate-700">
+                                    <h3 className="text-sm font-semibold text-slate-100">Camera Characteristics</h3>
 
                                     <div className="space-y-2">
-                                        <label className="text-xs font-medium text-slate-400">Camera Angle</label>
+                                        <label className="text-xs font-medium text-slate-300">Camera Angle</label>
                                         <select
                                             value={prompt.photographic_characteristics?.camera_angle || ''}
                                             onChange={(e) => handleNestedUpdate('photographic_characteristics', 'camera_angle', e.target.value)}
-                                            className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                            className="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-sm text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none cursor-pointer transition-colors"
                                         >
                                             <option value="" disabled>Select Angle</option>
                                             <option value="Eye Level">Eye Level</option>
@@ -231,11 +231,11 @@ export function PromptControls() {
 
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="space-y-2">
-                                            <label className="text-xs font-medium text-slate-400">Focal Length</label>
+                                            <label className="text-xs font-medium text-slate-300">Focal Length</label>
                                             <select
                                                 value={prompt.photographic_characteristics?.lens_focal_length || ''}
                                                 onChange={(e) => handleNestedUpdate('photographic_characteristics', 'lens_focal_length', e.target.value)}
-                                                className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                                className="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-sm text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none cursor-pointer transition-colors"
                                             >
                                                 <option value="" disabled>Lens</option>
                                                 <option value="Wide Angle">Wide Angle</option>
@@ -247,11 +247,11 @@ export function PromptControls() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-xs font-medium text-slate-400">Depth of Field</label>
+                                            <label className="text-xs font-medium text-slate-300">Depth of Field</label>
                                             <select
                                                 value={prompt.photographic_characteristics?.depth_of_field || ''}
                                                 onChange={(e) => handleNestedUpdate('photographic_characteristics', 'depth_of_field', e.target.value)}
-                                                className="w-full bg-slate-900/20 border border-slate-200/10 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none appearance-none"
+                                                className="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-sm text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none cursor-pointer transition-colors"
                                             >
                                                 <option value="" disabled>DoF</option>
                                                 <option value="Shallow">Shallow (Blurry BG)</option>

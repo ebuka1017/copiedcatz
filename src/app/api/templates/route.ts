@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyAuth } from '@/lib/auth';
+import { rateLimiters, RATE_LIMITS, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest) {
     try {
         const user = await verifyAuth(req);
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Rate limiting
+        const identifier = getIdentifier(req, user.id);
+        const rateLimitResult = rateLimiters.standard.checkWithResult(RATE_LIMITS.standard, identifier);
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                { message: 'Too many requests. Please try again later.' },
+                { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+            );
         }
 
         // Fetch templates with latest variation
@@ -57,6 +68,16 @@ export async function POST(req: NextRequest) {
         const user = await verifyAuth(req);
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Rate limiting for creation (stricter)
+        const identifier = getIdentifier(req, user.id);
+        const rateLimitResult = rateLimiters.upload.checkWithResult(RATE_LIMITS.upload, identifier);
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                { message: 'Too many requests. Please try again later.' },
+                { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+            );
         }
 
         const body = await req.json();
