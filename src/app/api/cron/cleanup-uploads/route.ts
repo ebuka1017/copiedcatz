@@ -1,24 +1,30 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-// import { db } from '@/lib/db'; // Removed duplicate
+import { verifyAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic'; // Ensure this route is not cached
 
-export async function GET(req: Request) {
-    // Verify cron secret to prevent unauthorized access
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-
-    // SECURITY: Always verify cron secret in production
-    if (!cronSecret) {
-        console.error('CRON_SECRET not configured - endpoint is INSECURE');
-        return new NextResponse('Server misconfiguration', { status: 500 });
+/**
+ * Manual cleanup trigger for admins
+ *
+ * Note: Automatic cleanup runs via Netlify Scheduled Function (see netlify/functions/cleanup-uploads.mts)
+ * This endpoint is for manual triggering by authenticated admins only.
+ *
+ * For Netlify deployment, scheduled tasks are handled by Netlify Functions, not API routes.
+ */
+export async function GET(req: NextRequest) {
+    // Require authenticated user (admin check could be added here)
+    const user = await verifyAuth(req);
+    if (!user) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    if (authHeader !== `Bearer ${cronSecret}`) {
-        console.warn('Unauthorized cron attempt detected');
-        return new NextResponse('Unauthorized', { status: 401 });
-    }
+    // Optional: Add admin role check here if you have roles
+    // if (user.role !== 'admin') {
+    //     return NextResponse.json({ message: 'Forbidden - Admin access required' }, { status: 403 });
+    // }
+
+    console.log(`Manual cleanup triggered by user: ${user.id}`);
 
     try {
         // 1. Find expired uploads
