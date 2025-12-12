@@ -34,6 +34,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@netlify/functions": "^2.8.2",
     "supabase": "^2.0.0",
     "@types/chrome": "^0.1.32",
     "@types/lodash-es": "^4.17.12",
