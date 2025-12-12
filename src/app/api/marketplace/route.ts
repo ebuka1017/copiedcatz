@@ -25,18 +25,14 @@ export async function GET(req: Request) {
     }
 
     if (query) {
+      // SECURITY: Escape query to prevent SQL injection
+      // PostgREST uses pattern matching, so we need to escape special chars
+      const sanitizedQuery = query
+        .replace(/[%_\\]/g, '\\$&') // Escape SQL LIKE wildcards
+        .replace(/[{}]/g, ''); // Remove PostgREST special chars
+
       // Search by name or tags
-      // OR syntax: name.ilike.%query%,tags.cs.{query}
-      // Note: tags is array, using 'cs' (contains)
-      // Combining AND (is_public) with OR (name/tags)
-      // PostgREST: url params are ANDed.
-      // We already have .eq('is_public', true).
-      // .or() applies to the whole row?
-      // syntax: .or('name.ilike.%hello%,tags.cs.{hello}')
-      // This will be ANDed with previous filters? 
-      // "Filters are mutually inclusive (AND) by default."
-      // So .eq('is_public', true).or(...) means (is_public) AND (name OR tags).
-      queryBuilder = queryBuilder.or(`name.ilike.%${query}%,tags.cs.{${query}}`);
+      queryBuilder = queryBuilder.or(`name.ilike.%${sanitizedQuery}%,tags.cs.{${sanitizedQuery}}`);
     }
 
     // Pagination

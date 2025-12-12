@@ -16,6 +16,21 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Missing url parameter' }, { status: 400 });
     }
 
+    // SECURITY: Prevent SSRF attacks - only allow Bria API URLs
+    const ALLOWED_HOSTS = ['engine.prod.bria-api.com', 'api.bria.ai'];
+    try {
+        const parsedUrl = new URL(statusUrl);
+        if (!ALLOWED_HOSTS.includes(parsedUrl.hostname)) {
+            console.warn(`SSRF attempt blocked: ${statusUrl}`);
+            return NextResponse.json(
+                { error: 'Invalid status URL - only Bria API URLs are allowed' },
+                { status: 400 }
+            );
+        }
+    } catch {
+        return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
+    }
+
     try {
         const response = await fetch(statusUrl, {
             headers: {

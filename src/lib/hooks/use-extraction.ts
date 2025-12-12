@@ -1,7 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import Pusher from 'pusher-js';
-import { useTemplateStore } from '@/lib/stores/template-store';
+import { useState, useCallback } from 'react';
+import { callEdgeFunction } from '@/lib/supabase/client';
 
 interface UseExtractionProps {
     onComplete?: (templateId: string) => void;
@@ -12,22 +10,16 @@ export function useExtraction({ onComplete, onError }: UseExtractionProps = {}) 
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState<'idle' | 'uploading' | 'processing' | 'completed' | 'error'>('idle');
     const [currentCategory, setCurrentCategory] = useState<string>('');
-    const supabase = createClient();
-
-    const { setTemplate } = useTemplateStore();
 
     const startExtraction = useCallback(async (blobId: string) => {
         try {
             setStatus('processing');
             setProgress(0);
 
-            const { data, error } = await supabase.functions.invoke('extract-template', {
-                body: { blob_id: blobId }
+            const data = await callEdgeFunction('extract-template', {
+                body: { blob_id: blobId },
+                method: 'POST'
             });
-
-            if (error) {
-                throw new Error(error.message || 'Failed to start extraction');
-            }
 
             const { job_id, status: initialStatus, template_id } = data;
 
@@ -47,7 +39,7 @@ export function useExtraction({ onComplete, onError }: UseExtractionProps = {}) 
             setStatus('error');
             onError?.(error instanceof Error ? error : new Error('Unknown error'));
         }
-    }, [onComplete, onError, setTemplate]);
+    }, [onComplete, onError]);
 
     const reset = useCallback(() => {
         setStatus('idle');

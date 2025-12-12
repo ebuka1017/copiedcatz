@@ -20,13 +20,13 @@ export function EmptyState({
     actionOnClick,
 }: EmptyStateProps) {
     return (
-        <div className="flex flex-col items-center justify-center p-12 text-center space-y-6 bg-slate-900/20 border border-slate-800/50 rounded-2xl backdrop-blur-sm">
-            <div className="w-16 h-16 bg-slate-800/50 rounded-2xl flex items-center justify-center text-slate-400">
+        <div className="flex flex-col items-center justify-center p-12 text-center space-y-6 bg-slate-800/50 border border-slate-700 rounded-2xl">
+            <div className="w-16 h-16 bg-slate-700 rounded-2xl flex items-center justify-center text-slate-300">
                 <Icon size={32} />
             </div>
             <div className="space-y-2 max-w-md">
                 <h3 className="text-xl font-semibold text-white">{title}</h3>
-                <p className="text-slate-400">{description}</p>
+                <p className="text-slate-300">{description}</p>
             </div>
             {actionLabel && (
                 <div className="pt-2">

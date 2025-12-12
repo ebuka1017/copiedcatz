@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Code, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
+import { callEdgeFunction } from "@/lib/supabase/client";
 
 interface Template {
     id: string;
@@ -30,15 +30,15 @@ export default function LibraryPage() {
 
     const fetchLibrary = async () => {
         try {
-            const supabase = createClient();
-            const { data, error } = await supabase.functions.invoke('database-access', {
+            // Use callEdgeFunction which properly handles auth headers
+            const data = await callEdgeFunction('database-access', {
                 body: {
                     table: 'Template',
                     query: '*' // Fetch all fields including structured_prompt
-                }
+                },
+                method: 'POST'
             });
 
-            if (error) throw new Error(error.message);
             if (data.error) throw new Error(data.error);
 
             setTemplates(data.data || []);
