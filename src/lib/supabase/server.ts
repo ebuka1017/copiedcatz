@@ -6,8 +6,8 @@ export async function createClient() {
     const cookieStore = await cookies();
 
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zljkcihttlwnvriycokw.supabase.co',
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsamtjaWh0dGx3bnZyaXljb2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NDgyODksImV4cCI6MjA4MDQyNDI4OX0.fZqod0QDSR9TavoJBeDPzMjrNXb8XoN1IpjEvoaWD28',
         {
             cookies: {
                 getAll() {
@@ -31,8 +31,8 @@ export async function createClient() {
 
 export function createAdminClient() {
     return createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key-for-build',
+        process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zljkcihttlwnvriycokw.supabase.co',
+        process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsamtjaWh0dGx3bnZyaXljb2t3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDg0ODI4OSwiZXhwIjoyMDgwNDI0Mjg5fQ.gD1hHbGCN8x4InO8AumwUJSzYKGKYa_WqSN6AaKNDLg',
         {
             auth: {
                 autoRefreshToken: false,
