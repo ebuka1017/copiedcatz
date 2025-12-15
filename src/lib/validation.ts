@@ -10,7 +10,7 @@ export const templateSchema = z.object({
     name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
     description: z.string().max(500, 'Description too long').optional(),
     prompt: z.string().min(1, 'Prompt is required').max(10000, 'Prompt too long'),
-    structured_prompt: z.record(z.any()).optional(),
+    structured_prompt: z.record(z.string(), z.unknown()).optional(),
     reference_url: z.string().url('Invalid URL').optional().nullable(),
     is_public: z.boolean().default(false),
     tags: z.array(z.string().max(50)).max(10, 'Too many tags').optional(),
