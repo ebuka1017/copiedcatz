@@ -109,7 +109,7 @@ export type StructuredPromptInput = z.infer<typeof structuredPromptSchema>;
 export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): T {
     const result = schema.safeParse(data);
     if (!result.success) {
-        const errors = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+        const errors = result.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
         throw new Error(`Validation failed: ${errors}`);
     }
     return result.data;
@@ -127,7 +127,7 @@ export function safeValidateInput<T>(schema: z.ZodSchema<T>, data: unknown): {
     if (!result.success) {
         return {
             success: false,
-            errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+            errors: result.error.issues.map(e => `${e.path.join('.')}: ${e.message}`),
         };
     }
     return { success: true, data: result.data };
