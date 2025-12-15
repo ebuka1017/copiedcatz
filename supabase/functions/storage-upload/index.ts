@@ -36,6 +36,24 @@ serve(async (req) => {
             })
         }
 
+        // JIT Sync: Ensure user exists in User table before creating Upload record
+        const { error: upsertError } = await supabaseClient
+            .from('User')
+            .upsert(
+                {
+                    id: user.id,
+                    email: user.email!,
+                    name: user.user_metadata?.name || user.user_metadata?.full_name || null,
+                    last_login_at: new Date().toISOString(),
+                },
+                { onConflict: 'id' }
+            )
+
+        if (upsertError) {
+            console.error('User sync error:', upsertError)
+            throw new Error('Failed to sync user data')
+        }
+
         const formData = await req.formData()
         const file = formData.get('file')
 
