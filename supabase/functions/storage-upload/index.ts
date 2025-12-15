@@ -60,6 +60,8 @@ serve(async (req) => {
         if (error) throw error
 
         // Also create the Upload record in the database
+        // Set expiry to 24 hours from now
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
         const { data: uploadRecord, error: dbError } = await supabaseClient
             .from('Upload')
             .insert({
@@ -67,7 +69,8 @@ serve(async (req) => {
                 filepath: fileName,
                 filename: file.name,
                 filetype: file.type,
-                size: file.size
+                size: file.size,
+                expires_at: expiresAt
             })
             .select()
             .single()
