@@ -86,7 +86,7 @@ export default function BatchPage() {
                                     <button
                                         onClick={handleUpload}
                                         disabled={uploading}
-                                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-full font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
                                         {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                                         {uploading ? 'Processing...' : 'Start Batch Extraction'}

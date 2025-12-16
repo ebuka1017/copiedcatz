@@ -114,7 +114,7 @@ export default function MarketplacePage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search templates..."
-                            className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-white placeholder-slate-500 backdrop-blur-sm transition-all"
+                            className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-full focus:ring-2 focus:ring-blue-500 outline-none text-white placeholder-slate-500 backdrop-blur-sm transition-all"
                         />
                     </div>
 
@@ -160,7 +160,7 @@ export default function MarketplacePage() {
                                                 <button
                                                     onClick={() => handleRemix(template.id)}
                                                     disabled={remixingId === template.id}
-                                                    className="px-4 py-2 bg-white text-slate-900 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="px-4 py-2 bg-white text-slate-900 rounded-full font-bold flex items-center gap-2 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     {remixingId === template.id ? (
                                                         <Loader2 className="w-4 h-4 animate-spin" />

@@ -166,7 +166,7 @@ export function UploadModal({ children }: UploadModalProps) {
 
                                 <Button
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 mt-2"
+                                    className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-full font-medium flex items-center gap-2 mt-2"
                                 >
                                     <ImageIcon className="w-4 h-4" />
                                     Browse Files

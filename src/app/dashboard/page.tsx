@@ -98,7 +98,7 @@ export default function Dashboard() {
               <p className="text-muted-foreground">Manage your visual DNA collection</p>
             </div>
             <UploadModal>
-              <button className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold flex items-center gap-2 transition-colors">
+              <button className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-full font-bold flex items-center gap-2 transition-colors">
                 <Plus className="w-5 h-5" />
                 New Template
               </button>
@@ -134,7 +134,7 @@ export default function Dashboard() {
               </div>
               <div className="pt-2">
                 <UploadModal>
-                  <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold flex items-center gap-2 text-white text-sm transition-colors">
+                  <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-full font-bold flex items-center gap-2 text-white text-sm transition-colors">
                     <Plus className="w-4 h-4" />
                     Create Template
                   </button>
@@ -160,13 +160,13 @@ export default function Dashboard() {
                       />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Link href={`/editor/${template.id}`}>
-                          <button className="p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors" title="Edit" aria-label={`Edit ${template.name}`}>
+                          <button className="p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-colors" title="Edit" aria-label={`Edit ${template.name}`}>
                             <Edit className="w-5 h-5" />
                           </button>
                         </Link>
                         <button
                           onClick={() => handleDelete(template.id)}
-                          className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg backdrop-blur-sm transition-colors"
+                          className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-full backdrop-blur-sm transition-colors"
                           title="Delete"
                           aria-label={`Delete ${template.name}`}
                         >

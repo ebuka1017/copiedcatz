@@ -28,7 +28,7 @@ export default function InstallExtensionPage() {
                                     <h3 className="text-2xl font-bold">Download the Extension</h3>
                                     <p className="text-slate-400">Get the latest version of the extension package.</p>
                                     <a href="/copiedcatz-extension.zip" download>
-                                        <button className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold flex items-center gap-2 transition-colors">
+                                        <button className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-full font-bold flex items-center gap-2 transition-colors">
                                             <Download size={20} />
                                             Download .zip
                                         </button>

@@ -29,7 +29,7 @@ export function HistoryToolbar() {
                 <button
                     onClick={undo}
                     disabled={!canUndo()}
-                    className="p-2 rounded-lg hover:bg-white/50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                    className="p-2 rounded-full hover:bg-white/50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                     title="Undo (Cmd+Z)"
                 >
                     <Undo2 className="w-5 h-5 text-slate-700" />
@@ -37,7 +37,7 @@ export function HistoryToolbar() {
                 <button
                     onClick={redo}
                     disabled={!canRedo()}
-                    className="p-2 rounded-lg hover:bg-white/50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                    className="p-2 rounded-full hover:bg-white/50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                     title="Redo (Cmd+Shift+Z)"
                 >
                     <Redo2 className="w-5 h-5 text-slate-700" />
@@ -45,7 +45,7 @@ export function HistoryToolbar() {
                 <div className="w-px h-6 bg-slate-300 mx-2" />
                 <button
                     onClick={() => saveTemplate()}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/50 text-sm font-medium text-slate-700 transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/50 text-sm font-medium text-slate-700 transition-colors"
                     title="Save (Cmd+S)"
                 >
                     <Save className="w-4 h-4" />
