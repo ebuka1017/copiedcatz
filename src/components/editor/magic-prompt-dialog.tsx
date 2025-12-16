@@ -41,7 +41,7 @@ export function MagicPromptDialog({ children }: MagicPromptDialogProps) {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {children || (
-                    <button className="h-8 w-8 flex items-center justify-center rounded-md text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 transition-colors">
+                    <button className="h-8 w-8 flex items-center justify-center rounded-full text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 transition-colors">
                         <Sparkles className="h-4 w-4" />
                     </button>
                 )}

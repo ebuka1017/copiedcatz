@@ -48,6 +48,37 @@ serve(async (req) => {
         }
 
         const { action, data } = body
+
+        // Handle status check action (for client-side polling fallback)
+        if (action === 'check_status') {
+            const statusUrl = data.status_url
+            if (!statusUrl) {
+                return new Response(JSON.stringify({ error: 'Missing status_url' }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 400,
+                })
+            }
+
+            // Validate status URL domain for SSRF prevention
+            const allowedDomains = ['engine.prod.bria-api.com', 'api.bria.ai']
+            const urlObj = new URL(statusUrl)
+            if (!allowedDomains.some(domain => urlObj.hostname.includes(domain))) {
+                return new Response(JSON.stringify({ error: 'Invalid status URL domain' }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 400,
+                })
+            }
+
+            const statusRes = await fetch(statusUrl, { headers: { 'api_token': briaApiToken } })
+            if (!statusRes.ok) throw new Error('Status check failed')
+            const statusData = await statusRes.json()
+
+            return new Response(JSON.stringify(statusData), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            })
+        }
+
         // Default to V2 endpoints
         let url = 'https://engine.prod.bria-api.com/v2/image/generate'
         let briaBody = data

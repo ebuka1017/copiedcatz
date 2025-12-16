@@ -17,7 +17,7 @@ export function Button({
     ...props
 }: ButtonProps) {
     // WCAG-compliant focus states with proper contrast ratios
-    const baseStyles = "inline-flex items-center justify-center font-medium transition-all duration-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none";
+    const baseStyles = "inline-flex items-center justify-center font-medium transition-all duration-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none";
 
     const variants = {
         primary: "bg-blue-600 text-white hover:bg-blue-500 active:bg-blue-700 shadow-sm hover:shadow-md",

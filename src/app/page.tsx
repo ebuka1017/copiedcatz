@@ -23,7 +23,7 @@ export default function LandingPage() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-              Extract <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-600">Visual DNA</span> from any design.
+              Extract <span className="text-slate-900">Visual DNA</span> from any design.
             </h1>
 
             <p className="text-xl text-slate-600 max-w-lg leading-relaxed font-medium">
@@ -32,13 +32,13 @@ export default function LandingPage() {
 
             <div className="flex flex-wrap gap-4 pt-2">
               <Link href="/signup">
-                <button className="px-8 py-4 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all transform hover:scale-105 hover:shadow-xl hover:shadow-primary-600/20 flex items-center gap-2">
+                <button className="px-8 py-4 bg-primary-600 text-white rounded-full font-bold hover:bg-primary-700 transition-all transform hover:scale-105 hover:shadow-xl hover:shadow-primary-600/20 flex items-center gap-2">
                   <Sparkles className="w-5 h-5" />
                   Start Creating Free
                 </button>
               </Link>
               <Link href="/#how-it-works">
-                <button className="px-8 py-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl font-medium transition-all flex items-center gap-2 hover:shadow-md">
+                <button className="px-8 py-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-full font-medium transition-all flex items-center gap-2 hover:shadow-md">
                   How it works
                 </button>
               </Link>
