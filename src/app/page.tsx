@@ -27,7 +27,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-xl text-slate-600 max-w-lg leading-relaxed font-medium">
-              CopiedCatz uses AI to analyze images and extract their stylistic essence—fonts, colors, and layout patterns—so you can remix and reuse them instantly.
+              CopiedCatz uses AI to analyze images and extract their Visual DNA—camera angles, lighting, composition, and style—so you can remix and generate stunning new variations instantly.
             </p>
 
             <div className="flex flex-wrap gap-4 pt-2">
@@ -95,15 +95,15 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-24 px-6 bg-slate-50/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-900">From Image to Remix in Seconds</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto text-lg">Stop guessing visual parameters. CopiedCatz extracts the DNA so you can generate new variations.</p>
+            <h2 className="text-3xl md:text-5xl font-bold text-slate-900">Professional Controls, Zero Guesswork</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto text-lg">Stop fighting with random prompts. CopiedCatz gives you deterministic control over every visual parameter.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { title: 'Upload Image', desc: 'Drag and drop any reference image.', icon: Layers, color: 'text-blue-600', bg: 'bg-blue-100' },
-              { title: 'DNA Extraction', desc: 'Our engine identifies lighting, composition, and style.', icon: Sparkles, color: 'text-purple-600', bg: 'bg-purple-100' },
-              { title: 'Generate & Remix', desc: 'Create infinite new image variations based on the source style.', icon: Zap, color: 'text-pink-600', bg: 'bg-pink-100' }
+              { title: 'Upload Any Image', desc: 'Drag and drop any reference—ads, posters, photos, or screenshots.', icon: Layers, color: 'text-blue-600', bg: 'bg-blue-100' },
+              { title: 'Extract Visual DNA', desc: 'AI decodes camera angles, lighting, depth of field, color palette, and mood.', icon: Sparkles, color: 'text-purple-600', bg: 'bg-purple-100' },
+              { title: 'Remix & Generate', desc: 'Edit the recipe, swap subjects, and generate pro-quality variations.', icon: Zap, color: 'text-pink-600', bg: 'bg-pink-100' }
             ].map((feature, i) => (
               <Card key={i} className="p-8 bg-white border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all group">
                 <div className={`w-14 h-14 rounded-2xl ${feature.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
