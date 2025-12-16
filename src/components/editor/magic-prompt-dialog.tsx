@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } 
 import { Button } from '@/components/ui/button';
 import { Sparkles, Loader2, Wand2, Zap } from 'lucide-react';
 import { useTemplateStore } from '@/lib/stores/template-store';
+import { callEdgeFunction } from '@/lib/supabase/client';
 
 interface MagicPromptDialogProps {
     children?: React.ReactNode;
@@ -26,23 +27,14 @@ export function MagicPromptDialog({ children }: MagicPromptDialogProps) {
         setLoadingStep('Analyzing your description...');
 
         try {
-            // Use Gemini to generate the structured prompt
-            const response = await fetch('/api/gemini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+            // Use Gemini edge function to generate the structured prompt
+            setLoadingStep('Building Visual DNA structure...');
+            const { result } = await callEdgeFunction('gemini', {
+                body: {
                     action: 'generate_from_description',
                     data: { description: prompt }
-                })
+                }
             });
-
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error || 'Failed to generate');
-            }
-
-            setLoadingStep('Building Visual DNA structure...');
-            const { result } = await response.json();
 
             setStructuredPrompt(result);
             setOpen(false);

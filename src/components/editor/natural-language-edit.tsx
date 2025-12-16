@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import { MessageSquare, Loader2, Send, Sparkles } from 'lucide-react';
+import { callEdgeFunction } from '@/lib/supabase/client';
 
 export function NaturalLanguageEdit() {
     const [instruction, setInstruction] = useState('');
@@ -18,24 +19,16 @@ export function NaturalLanguageEdit() {
         setError(null);
 
         try {
-            const response = await fetch('/api/gemini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+            const { result } = await callEdgeFunction('gemini', {
+                body: {
                     action: 'natural_edit',
                     data: {
                         prompt: template.structured_prompt,
                         instruction: instruction.trim()
                     }
-                })
+                }
             });
 
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error || 'Failed to apply edit');
-            }
-
-            const { result } = await response.json();
             setStructuredPrompt(result);
             setInstruction('');
         } catch (err: any) {
