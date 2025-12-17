@@ -177,22 +177,25 @@ serve(async (req) => {
             step: 'Initializing extraction...'
         });
 
-        // Call Bria FIBO API - Structured Prompt Generation
-        // Docs: https://docs.bria.ai/image-generation/v2-endpoints/structured-prompt-generate
+        // Call Bria FIBO V2 API - Structured Prompt Generation (Inspire mode)
+        // This extracts Visual DNA from the image
         await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
             status: 'processing',
             progress: 20,
             step: 'Analyzing image with FIBO...'
         });
 
-        const briaRes = await fetch('https://engine.prod.bria-api.com/v1/product/lifestyle/create_from_image', {
+        // Use the V2 structured_prompt/generate endpoint with inspire mode
+        const briaRes = await fetch('https://engine.prod.bria-api.com/v2/structured_prompt/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'api_token': briaApiToken!
             },
             body: JSON.stringify({
+                prompt: "Extract the visual DNA of this image",
                 image_url: imageUrl,
+                image_influence: 0.9
             })
         });
 

@@ -78,23 +78,33 @@ serve(async (req) => {
             })
         }
 
-        // Generate image using Bria API
+        // Generate image using Bria FIBO V2 API
         // https://docs.bria.ai/image-generation/v2-endpoints/image-generate
-        let url = 'https://engine.prod.bria-api.com/v1/text-to-image/base/2.3'
-        let briaBody = data
+        let url = 'https://engine.prod.bria-api.com/v2/image/generate'
+        let briaBody: any = {}
 
         if (action === 'generate_from_prompt') {
-            // Use text-to-image with the structured prompt as description
-            const prompt = typeof data.structured_prompt === 'object'
-                ? data.structured_prompt.short_description || JSON.stringify(data.structured_prompt)
-                : data.prompt || 'Generate an image'
+            // Use FIBO V2 with structured_prompt for precise control
+            const structuredPrompt = data.structured_prompt
 
-            briaBody = {
-                prompt: prompt,
-                num_results: 1,
-                sync: false,
-                ...data
+            if (structuredPrompt && typeof structuredPrompt === 'object') {
+                // Pass the structured prompt directly to FIBO
+                briaBody = {
+                    structured_prompt: JSON.stringify(structuredPrompt),
+                    prompt: data.prompt || structuredPrompt.short_description || "Generate an image",
+                    num_results: 1,
+                    sync: false
+                }
+            } else {
+                // Fallback to simple prompt
+                briaBody = {
+                    prompt: data.prompt || 'Generate an image',
+                    num_results: 1,
+                    sync: false
+                }
             }
+        } else {
+            briaBody = data
         }
 
         console.log('Calling Bria API:', url, JSON.stringify(briaBody, null, 2));
