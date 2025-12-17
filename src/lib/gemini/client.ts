@@ -1,6 +1,6 @@
 import { StructuredPrompt, ObjectDescription } from '@/lib/bria/types';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-06-05:generateContent';
 
 interface GeminiResponse {
     candidates?: {

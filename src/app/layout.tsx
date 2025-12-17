@@ -39,8 +39,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} font-sans`}>
+    <html lang="en" className="dark">
+      <body className={`${poppins.variable} font-sans bg-background text-foreground`}>
         <ErrorBoundary>
           {children}
         </ErrorBoundary>

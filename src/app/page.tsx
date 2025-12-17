@@ -7,47 +7,47 @@ import Image from "next/image";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white text-slate-900 overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-white overflow-x-hidden">
       <Navbar />
 
       {/* Hero Section */}
       <section className="relative pt-40 pb-20 px-6 overflow-hidden">
-        {/* Subtle Light Mode Gradient */}
-        <div className="absolute top-0 inset-x-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white -z-10"></div>
+        {/* Dark Mode Gradient */}
+        <div className="absolute top-0 inset-x-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/30 via-slate-950 to-slate-950 -z-10"></div>
 
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">New: v2.0 Released</span>
+              <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">New: v2.0 Released</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-              Extract <span className="text-slate-900">Visual DNA</span> from any design.
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.1]">
+              Extract <span className="text-white">Visual DNA</span> from any design.
             </h1>
 
-            <p className="text-xl text-slate-600 max-w-lg leading-relaxed font-medium">
+            <p className="text-xl text-slate-300 max-w-lg leading-relaxed font-medium">
               CopiedCatz uses AI to analyze images and extract their Visual DNA—camera angles, lighting, composition, and style—so you can remix and generate stunning new variations instantly.
             </p>
 
             <div className="flex flex-wrap gap-4 pt-2">
               <Link href="/signup">
-                <button className="px-8 py-4 bg-primary-600 text-white rounded-full font-bold hover:bg-primary-700 transition-all transform hover:scale-105 hover:shadow-xl hover:shadow-primary-600/20 flex items-center gap-2">
+                <button className="px-8 py-4 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-500 transition-all transform hover:scale-105 hover:shadow-xl hover:shadow-blue-600/30 flex items-center gap-2">
                   <Sparkles className="w-5 h-5" />
                   Start Creating Free
                 </button>
               </Link>
               <Link href="/#how-it-works">
-                <button className="px-8 py-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-full font-medium transition-all flex items-center gap-2 hover:shadow-md">
+                <button className="px-8 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-full font-medium transition-all flex items-center gap-2 hover:shadow-md">
                   How it works
                 </button>
               </Link>
             </div>
 
-            <div className="flex items-center gap-4 text-sm text-slate-500 pt-4">
+            <div className="flex items-center gap-4 text-sm text-slate-400 pt-4">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-slate-800 bg-slate-600"></div>
                 ))}
               </div>
               <span>Trusted by 2,000+ designers</span>
@@ -55,36 +55,36 @@ export default function LandingPage() {
           </div>
 
           <div className="relative group">
-            <div className="absolute -inset-4 bg-gradient-to-r from-primary-100 to-accent-100 rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000 -z-10"></div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000 -z-10"></div>
 
-            <Card className="p-2 transform rotate-1 group-hover:rotate-0 transition-transform duration-700 bg-white border-slate-200 shadow-2xl">
+            <Card className="p-2 transform rotate-1 group-hover:rotate-0 transition-transform duration-700 bg-slate-900 border-slate-700 shadow-2xl">
               <Image
                 src="/hero-visual.png"
                 alt="CopiedCatz Interface"
                 width={800}
                 height={600}
-                className="rounded-lg border border-slate-100 bg-slate-50"
+                className="rounded-lg border border-slate-700 bg-slate-800"
               />
             </Card>
 
-            {/* Floating Elements (Light Mode Style) */}
-            <Card className="absolute -bottom-8 -left-8 p-4 flex items-center gap-3 animate-bounce shadow-xl shadow-slate-200/50 bg-white border-slate-100" style={{ animationDuration: '3s' }}>
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-blue-600" />
+            {/* Floating Elements (Dark Mode Style) */}
+            <Card className="absolute -bottom-8 -left-8 p-4 flex items-center gap-3 animate-bounce shadow-xl shadow-blue-500/10 bg-slate-900 border-slate-700" style={{ animationDuration: '3s' }}>
+              <div className="w-10 h-10 rounded-lg bg-blue-900/50 flex items-center justify-center">
+                <Zap className="w-6 h-6 text-blue-400" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-slate-500 uppercase">Processing</div>
-                <div className="font-bold text-lg text-slate-900">0.4s</div>
+                <div className="text-xs font-semibold text-slate-400 uppercase">Processing</div>
+                <div className="font-bold text-lg text-white">0.4s</div>
               </div>
             </Card>
 
-            <Card className="absolute -top-8 -right-8 p-4 flex items-center gap-3 animate-bounce shadow-xl shadow-slate-200/50 bg-white border-slate-100" style={{ animationDuration: '4s' }}>
-              <div className="w-10 h-10 rounded-lg bg-pink-50 flex items-center justify-center">
-                <Layers className="w-6 h-6 text-pink-600" />
+            <Card className="absolute -top-8 -right-8 p-4 flex items-center gap-3 animate-bounce shadow-xl shadow-purple-500/10 bg-slate-900 border-slate-700" style={{ animationDuration: '4s' }}>
+              <div className="w-10 h-10 rounded-lg bg-purple-900/50 flex items-center justify-center">
+                <Layers className="w-6 h-6 text-purple-400" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-slate-500 uppercase">Layers</div>
-                <div className="font-bold text-lg text-slate-900">12+</div>
+                <div className="text-xs font-semibold text-slate-400 uppercase">Layers</div>
+                <div className="font-bold text-lg text-white">12+</div>
               </div>
             </Card>
           </div>
@@ -92,25 +92,25 @@ export default function LandingPage() {
       </section>
 
       {/* Features Grid */}
-      <section id="how-it-works" className="py-24 px-6 bg-slate-50/50">
+      <section id="how-it-works" className="py-24 px-6 bg-slate-900/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-900">Professional Controls, Zero Guesswork</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto text-lg">Stop fighting with random prompts. CopiedCatz gives you deterministic control over every visual parameter.</p>
+            <h2 className="text-3xl md:text-5xl font-bold text-white">Professional Controls, Zero Guesswork</h2>
+            <p className="text-slate-300 max-w-2xl mx-auto text-lg">Stop fighting with random prompts. CopiedCatz gives you deterministic control over every visual parameter.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { title: 'Upload Any Image', desc: 'Drag and drop any reference—ads, posters, photos, or screenshots.', icon: Layers, color: 'text-blue-600', bg: 'bg-blue-100' },
-              { title: 'Extract Visual DNA', desc: 'AI decodes camera angles, lighting, depth of field, color palette, and mood.', icon: Sparkles, color: 'text-purple-600', bg: 'bg-purple-100' },
-              { title: 'Remix & Generate', desc: 'Edit the recipe, swap subjects, and generate pro-quality variations.', icon: Zap, color: 'text-pink-600', bg: 'bg-pink-100' }
+              { title: 'Upload Any Image', desc: 'Drag and drop any reference—ads, posters, photos, or screenshots.', icon: Layers, color: 'text-blue-400', bg: 'bg-blue-900/50' },
+              { title: 'Extract Visual DNA', desc: 'AI decodes camera angles, lighting, depth of field, color palette, and mood.', icon: Sparkles, color: 'text-purple-400', bg: 'bg-purple-900/50' },
+              { title: 'Remix & Generate', desc: 'Edit the recipe, swap subjects, and generate pro-quality variations.', icon: Zap, color: 'text-pink-400', bg: 'bg-pink-900/50' }
             ].map((feature, i) => (
-              <Card key={i} className="p-8 bg-white border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all group">
+              <Card key={i} className="p-8 bg-slate-900 border-slate-700 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all group">
                 <div className={`w-14 h-14 rounded-2xl ${feature.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                   <feature.icon className={`w-7 h-7 ${feature.color}`} />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">{feature.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
+                <h3 className="text-xl font-bold mb-3 text-white">{feature.title}</h3>
+                <p className="text-slate-400 leading-relaxed">{feature.desc}</p>
               </Card>
             ))}
           </div>
@@ -122,10 +122,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-slate-900">Endless Possibilities</h2>
-              <p className="text-slate-600 text-lg">See what you can build with CopiedCatz.</p>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">Endless Possibilities</h2>
+              <p className="text-slate-400 text-lg">See what you can build with CopiedCatz.</p>
             </div>
-            <Link href="/marketplace" className="text-primary-600 font-semibold hover:text-primary-700 flex items-center gap-2 transition-colors">
+            <Link href="/marketplace" className="text-blue-400 font-semibold hover:text-blue-300 flex items-center gap-2 transition-colors">
               View Marketplace <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
