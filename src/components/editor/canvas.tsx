@@ -3,19 +3,21 @@
 import { Card } from '@/components/ui/card';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import { useOptimisticGeneration } from '@/lib/hooks/use-optimistic-generation';
-import Image from 'next/image';
+import { useState } from 'react';
+import { ImageOff } from 'lucide-react';
 
 export function Canvas() {
     const { template } = useTemplateStore();
     const optimisticState = useOptimisticGeneration();
+    const [imageError, setImageError] = useState(false);
 
     if (!template) return null;
 
     // Determine which image to show:
-    // 1. Optimistic state (loading/generating)
-    // 2. Latest variation
-    // 3. Original image
-    const latestVariation = template.variations[template.variations.length - 1];
+    // 1. Latest variation
+    // 2. Original image
+    const variations = template.variations || [];
+    const latestVariation = variations[variations.length - 1];
     const displayImage = latestVariation?.image_url || template.original_image_url;
 
     return (
@@ -30,17 +32,25 @@ export function Canvas() {
 
             {/* Image Container */}
             <div className="relative w-full h-full max-w-4xl max-h-[80vh] shadow-2xl rounded-lg overflow-hidden transition-transform duration-500 ease-out">
-                {displayImage ? (
-                    <Image
+                {displayImage && !imageError ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
                         src={displayImage}
                         alt="Template preview"
-                        fill
-                        className="object-contain"
-                        priority
+                        className="w-full h-full object-contain"
+                        onError={() => setImageError(true)}
                     />
                 ) : (
-                    <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-                        No image available
+                    <div className="w-full h-full bg-slate-800 flex flex-col items-center justify-center text-slate-400 gap-3">
+                        <ImageOff className="w-12 h-12 opacity-50" />
+                        <p className="text-sm">
+                            {imageError ? 'Failed to load image' : 'No image available'}
+                        </p>
+                        {displayImage && (
+                            <p className="text-xs text-slate-500 max-w-md truncate px-4">
+                                URL: {displayImage}
+                            </p>
+                        )}
                     </div>
                 )}
 

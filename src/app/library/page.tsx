@@ -6,8 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Code, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { Code, Loader2, ImageOff } from "lucide-react";
 import { callEdgeFunction } from "@/lib/supabase/client";
 
 interface Template {
@@ -16,6 +15,48 @@ interface Template {
     original_image_url: string;
     structured_prompt: any;
     created_at: string;
+}
+
+function TemplateCard({ template, onViewDNA }: { template: Template; onViewDNA: () => void }) {
+    const [imageError, setImageError] = useState(false);
+
+    return (
+        <Card className="overflow-hidden group hover:border-blue-500 transition-colors bg-card border-border">
+            <div className="relative aspect-square bg-slate-800">
+                {template.original_image_url && !imageError ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={template.original_image_url}
+                        alt={template.name}
+                        className="w-full h-full object-cover"
+                        onError={() => setImageError(true)}
+                    />
+                ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-2">
+                        <ImageOff className="w-8 h-8" />
+                        <span className="text-xs">No preview</span>
+                    </div>
+                )}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={onViewDNA}
+                    >
+                        <Code className="w-4 h-4" />
+                        View DNA
+                    </Button>
+                </div>
+            </div>
+            <div className="p-3">
+                <h3 className="font-medium truncate">{template.name}</h3>
+                <p className="text-xs text-muted-foreground">
+                    {new Date(template.created_at).toLocaleDateString()}
+                </p>
+            </div>
+        </Card>
+    );
 }
 
 export default function LibraryPage() {
@@ -72,33 +113,11 @@ export default function LibraryPage() {
                     ) : (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {templates.map((template) => (
-                                <Card key={template.id} className="overflow-hidden group hover:border-blue-500 transition-colors bg-card border-border">
-                                    <div className="relative aspect-square">
-                                        <Image
-                                            src={template.original_image_url}
-                                            alt={template.name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <Button
-                                                variant="secondary"
-                                                size="sm"
-                                                className="flex items-center gap-2"
-                                                onClick={() => setSelectedTemplate(template)}
-                                            >
-                                                <Code className="w-4 h-4" />
-                                                View DNA
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="p-3">
-                                        <h3 className="font-medium truncate">{template.name}</h3>
-                                        <p className="text-xs text-muted-foreground">
-                                            {new Date(template.created_at).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </Card>
+                                <TemplateCard
+                                    key={template.id}
+                                    template={template}
+                                    onViewDNA={() => setSelectedTemplate(template)}
+                                />
                             ))}
                         </div>
                     )}
