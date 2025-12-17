@@ -7,6 +7,89 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-06-05:generateContent';
+
+/**
+ * Use Gemini to convert raw FIBO output into clean, structured JSON
+ */
+async function cleanWithGemini(fiboData: any, geminiApiKey: string): Promise<any> {
+    const prompt = `You are an expert at converting raw AI model outputs into clean, well-structured JSON.
+
+Given this raw Visual DNA extraction from an image analysis AI (FIBO):
+${JSON.stringify(fiboData, null, 2)}
+
+Convert this into a clean, user-friendly structured prompt JSON with this exact format:
+{
+    "short_description": "A brief 1-sentence description of the scene",
+    "objects": [
+        {
+            "description": "Main subject description",
+            "location": "Position in frame (center, left, right, foreground, background)",
+            "relationship": "Role in scene (primary subject, secondary element, background)",
+            "relative_size": "Size relative to frame (small, medium, large)",
+            "shape_and_color": "Key visual characteristics",
+            "texture": "Surface texture if applicable"
+        }
+    ],
+    "background_setting": "Description of the environment/background",
+    "lighting": {
+        "conditions": "Type of lighting (natural, studio, dramatic, etc.)",
+        "direction": "Where light comes from (front, side, backlit, etc.)",
+        "shadows": "Shadow characteristics"
+    },
+    "aesthetics": {
+        "composition": "Composition style (rule of thirds, centered, etc.)",
+        "color_scheme": "Color palette description",
+        "mood_atmosphere": "Emotional tone and atmosphere"
+    },
+    "photographic_characteristics": {
+        "depth_of_field": "Shallow, medium, or deep",
+        "focus": "What's in focus",
+        "camera_angle": "Eye level, low angle, high angle, etc.",
+        "lens_focal_length": "Wide, standard, telephoto, etc."
+    },
+    "style_medium": "Photography, digital art, illustration, etc.",
+    "artistic_style": "Any specific artistic style reference"
+}
+
+Return ONLY valid JSON, no markdown code blocks, no explanations.`;
+
+    try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${geminiApiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.3,
+                    maxOutputTokens: 4096,
+                },
+            }),
+        });
+
+        if (!response.ok) {
+            console.error('Gemini API error:', await response.text());
+            return fiboData; // Fallback to raw FIBO data
+        }
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!text) {
+            return fiboData;
+        }
+
+        // Extract JSON from potential markdown code blocks
+        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        const jsonStr = jsonMatch ? jsonMatch[1].trim() : text.trim();
+
+        return JSON.parse(jsonStr);
+    } catch (error) {
+        console.error('Gemini processing error:', error);
+        return fiboData; // Fallback to raw FIBO data
+    }
+}
+
 serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
@@ -17,6 +100,7 @@ serve(async (req) => {
         const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
         const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
         const briaApiToken = Deno.env.get('BRIA_API_TOKEN')
+        const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
         const pusherAppId = Deno.env.get('PUSHER_APP_ID')
         const pusherKey = Deno.env.get('PUSHER_KEY')
         const pusherSecret = Deno.env.get('PUSHER_SECRET')
@@ -131,13 +215,25 @@ serve(async (req) => {
             }
         }
 
-        // Create Template
+        // Process with Gemini to create clean, copyable JSON
+        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+            status: 'processing',
+            progress: 80,
+            step: 'Converting to structured JSON...'
+        });
+
+        let structuredPrompt = briaData;
+        if (geminiApiKey) {
+            structuredPrompt = await cleanWithGemini(briaData, geminiApiKey);
+        }
+
+        // Create Template with cleaned JSON
         const { data: template, error: temError } = await supabaseAdmin.from('Template')
             .insert({
                 user_id: user.id,
                 name: `Extraction ${new Date().toLocaleString()}`,
                 original_image_url: imageUrl,
-                structured_prompt: briaData,
+                structured_prompt: structuredPrompt,
                 is_public: false,
                 folder_id: null
             })
