@@ -26,7 +26,11 @@ export async function GET(
             return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
         }
 
-        return NextResponse.json(template);
+        // Ensure variations is always an array
+        return NextResponse.json({
+            ...template,
+            variations: template.variations || []
+        });
     } catch (error) {
         console.error('Failed to load template:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
