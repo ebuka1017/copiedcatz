@@ -69,7 +69,7 @@ Return ONLY valid JSON, no markdown code blocks, no explanations.`;
 
         if (!response.ok) {
             console.error('Gemini API error:', await response.text());
-            return fiboData; // Fallback to raw FIBO data
+            return fiboData;
         }
 
         const data = await response.json();
@@ -79,14 +79,13 @@ Return ONLY valid JSON, no markdown code blocks, no explanations.`;
             return fiboData;
         }
 
-        // Extract JSON from potential markdown code blocks
         const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
         const jsonStr = jsonMatch ? jsonMatch[1].trim() : text.trim();
 
         return JSON.parse(jsonStr);
     } catch (error) {
         console.error('Gemini processing error:', error);
-        return fiboData; // Fallback to raw FIBO data
+        return fiboData;
     }
 }
 
@@ -178,60 +177,102 @@ serve(async (req) => {
             step: 'Initializing extraction...'
         });
 
-        // Call FIBO via fal.ai to extract structured prompt from image
-        // Docs: https://fal.ai/models/bria/fibo/generate
-        const falApiKey = Deno.env.get('FAL_KEY') || briaApiToken;
-
+        // Call Bria FIBO V2 API - Structured Prompt Generation (Inspire mode)
+        // This extracts Visual DNA from the image
         await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
             status: 'processing',
             progress: 20,
             step: 'Analyzing image with FIBO...'
         });
 
-        const fiboRes = await fetch('https://fal.run/fal-ai/bria-fibo', {
+        // Use the V2 structured_prompt/generate endpoint
+        // Per docs: use "images" array to extract Visual DNA from reference image
+        const briaRes = await fetch('https://engine.prod.bria-api.com/v2/structured_prompt/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Key ${falApiKey}`,
+                'api_token': briaApiToken!
             },
             body: JSON.stringify({
-                image_url: imageUrl,
-                seed: Math.floor(Math.random() * 10000),
-                steps_num: 30,
-                sync_mode: true,  // Wait for result
+                images: [imageUrl],  // Array of image URLs per Bria docs
+                sync: false
             })
         });
 
-        if (!fiboRes.ok) {
-            const errText = await fiboRes.text();
-            console.error('FIBO API Error:', fiboRes.status, errText);
-            throw new Error(`FIBO Error: ${fiboRes.status} - ${errText}`);
+        if (!briaRes.ok) {
+            const errText = await briaRes.text();
+            console.error('Bria API Error:', briaRes.status, errText);
+            throw new Error(`Bria Error: ${briaRes.status} - ${errText}`);
         }
 
-        const fiboData = await fiboRes.json();
+        let briaData = await briaRes.json();
+        let structuredPromptStr: string = '';
+
+        // Polling if async (202 response with status_url)
+        if (briaData.status_url) {
+            let attempts = 0;
+            const maxAttempts = 60;
+
+            while (attempts < maxAttempts) {
+                await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+                    status: 'processing',
+                    progress: 30 + Math.min(attempts * 2, 40),
+                    step: 'Extracting Visual DNA...'
+                });
+
+                const pollRes = await fetch(briaData.status_url, {
+                    headers: { 'api_token': briaApiToken! }
+                });
+
+                if (!pollRes.ok) throw new Error('Bria status check failed');
+
+                const pollData = await pollRes.json();
+                console.log('Poll response:', JSON.stringify(pollData, null, 2));
+
+                if (pollData.status === 'completed') {
+                    // Per Bria docs: result.structured_prompt is a STRING
+                    structuredPromptStr = pollData.result?.structured_prompt || '';
+                    break;
+                }
+                if (pollData.status === 'failed') {
+                    throw new Error('Bria extraction failed: ' + (pollData.error?.message || 'Unknown error'));
+                }
+
+                await new Promise(r => setTimeout(r, 2000));
+                attempts++;
+            }
+        } else if (briaData.result?.structured_prompt) {
+            // Synchronous response (200)
+            structuredPromptStr = briaData.result.structured_prompt;
+        }
+
+        if (!structuredPromptStr) {
+            throw new Error('No structured prompt returned from Bria API');
+        }
 
         await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
             status: 'processing',
-            progress: 60,
+            progress: 75,
             step: 'Visual DNA extracted!'
         });
 
-        // The structured_prompt is returned in the response
-        let extractedData = fiboData.structured_prompt || fiboData;
-
-        // Process with Gemini to create clean, copyable JSON
-        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
-            status: 'processing',
-            progress: 80,
-            step: 'Converting to structured JSON...'
-        });
-
-        let structuredPrompt = extractedData;
-        if (geminiApiKey) {
-            structuredPrompt = await cleanWithGemini(extractedData, geminiApiKey);
+        // Parse the structured_prompt string into JSON
+        let structuredPrompt: any;
+        try {
+            structuredPrompt = JSON.parse(structuredPromptStr);
+        } catch (e) {
+            console.error('Failed to parse structured_prompt:', e);
+            // If parsing fails, wrap the string
+            structuredPrompt = { raw_prompt: structuredPromptStr };
         }
 
-        // Create Template with cleaned JSON
+        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+            status: 'processing',
+            progress: 85,
+            step: 'Processing Visual DNA...'
+        });
+
+        // Create Template
         const { data: template, error: temError } = await supabaseAdmin.from('Template')
             .insert({
                 user_id: user.id,

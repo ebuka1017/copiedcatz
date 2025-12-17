@@ -52,11 +52,11 @@ export function ImagePreview() {
 
     return (
         <div className={`${styles.card} h-full flex flex-col p-4 relative overflow-hidden`}>
-            <div className="flex-1 flex items-center justify-center bg-slate-900/5 rounded-xl overflow-hidden relative">
+            <div className="flex-1 flex items-center justify-center bg-slate-800/50 rounded-xl overflow-hidden relative">
                 {isGenerating && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm">
-                        <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-2" />
-                        <p className="text-sm font-medium text-slate-600">Generating Variation...</p>
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+                        <Loader2 className="w-10 h-10 text-blue-400 animate-spin mb-2" />
+                        <p className="text-sm font-medium text-slate-300">Generating Variation...</p>
                     </div>
                 )}
 
@@ -69,7 +69,7 @@ export function ImagePreview() {
             </div>
 
             <div className="mt-4 flex justify-between items-center">
-                <div className="text-sm text-slate-500">
+                <div className="text-sm text-slate-400">
                     {template.variations.length > 0
                         ? `Variation #${template.variations.length}`
                         : 'Original Image'}
@@ -100,7 +100,7 @@ export function ImagePreview() {
                         <Download className="w-4 h-4" />
                         Download
                     </button>
-                    <button className={`${buttonStyles.button} !py-2 !px-3 !text-sm !bg-white/50 !text-slate-700 hover:!bg-white/80`}>
+                    <button className={`${buttonStyles.button} !py-2 !px-3 !text-sm !bg-slate-800 !text-slate-300 hover:!bg-slate-700`}>
                         <Share2 className="w-4 h-4" />
                         Share
                     </button>
