@@ -6,6 +6,9 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// FIBO via fal.ai - https://fal.ai/models/bria/fibo/generate
+const FIBO_API_URL = 'https://fal.run/fal-ai/bria-fibo';
+
 serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
@@ -14,10 +17,13 @@ serve(async (req) => {
     try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')
         const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
-        const briaApiToken = Deno.env.get('BRIA_API_TOKEN')
+        const falApiKey = Deno.env.get('FAL_KEY')
+        const briaApiToken = Deno.env.get('BRIA_API_TOKEN') // Fallback
 
-        if (!supabaseUrl || !supabaseAnonKey || !briaApiToken) {
-            throw new Error('Missing Environment Variables')
+        const apiKey = falApiKey || briaApiToken;
+
+        if (!supabaseUrl || !supabaseAnonKey || !apiKey) {
+            throw new Error('Missing Environment Variables (need FAL_KEY or BRIA_API_TOKEN)')
         }
 
         const supabaseClient = createClient(
@@ -49,86 +55,56 @@ serve(async (req) => {
 
         const { action, data } = body
 
-        // Handle status check action (for client-side polling fallback)
-        if (action === 'check_status') {
-            const statusUrl = data.status_url
-            if (!statusUrl) {
-                return new Response(JSON.stringify({ error: 'Missing status_url' }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 400,
-                })
-            }
+        // Generate image using FIBO via fal.ai
+        // Accepts: prompt, structured_prompt, image_url, seed, steps_num, aspect_ratio
+        const fiboPayload: any = {
+            sync_mode: true,
+            seed: data.seed || Math.floor(Math.random() * 10000),
+            steps_num: data.steps_num || 30,
+            aspect_ratio: data.aspect_ratio || '1:1',
+        };
 
-            // Validate status URL domain for SSRF prevention
-            const allowedDomains = ['engine.prod.bria-api.com', 'api.bria.ai']
-            const urlObj = new URL(statusUrl)
-            if (!allowedDomains.some(domain => urlObj.hostname.includes(domain))) {
-                return new Response(JSON.stringify({ error: 'Invalid status URL domain' }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 400,
-                })
-            }
-
-            const statusRes = await fetch(statusUrl, { headers: { 'api_token': briaApiToken } })
-            if (!statusRes.ok) throw new Error('Status check failed')
-            const statusData = await statusRes.json()
-
-            return new Response(JSON.stringify(statusData), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200,
-            })
+        // Add prompt or structured_prompt
+        if (data.structured_prompt) {
+            fiboPayload.structured_prompt = data.structured_prompt;
+        }
+        if (data.prompt) {
+            fiboPayload.prompt = data.prompt;
+        }
+        if (data.image_url) {
+            fiboPayload.image_url = data.image_url;
+        }
+        if (data.negative_prompt) {
+            fiboPayload.negative_prompt = data.negative_prompt;
         }
 
-        // Default to V2 endpoints
-        let url = 'https://engine.prod.bria-api.com/v2/image/generate'
-        let briaBody = data
+        console.log('Calling FIBO with:', JSON.stringify(fiboPayload, null, 2));
 
-        if (action === 'generate_structured_prompt') {
-            url = 'https://engine.prod.bria-api.com/v2/structured_prompt/generate'
-        } else if (action === 'remove_background') {
-            url = 'https://engine.prod.bria-api.com/v2/image/edit/remove_background'
-        } else if (action === 'increase_resolution') {
-            url = 'https://engine.prod.bria-api.com/v2/image/edit/increase_resolution'
-        }
-
-        const response = await fetch(url, {
+        const response = await fetch(FIBO_API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'api_token': briaApiToken
+                'Authorization': `Key ${apiKey}`,
             },
-            body: JSON.stringify(briaBody)
-        })
+            body: JSON.stringify(fiboPayload)
+        });
 
         if (!response.ok) {
-            const errText = await response.text()
-            throw new Error(`Bria API Error: ${response.status} - ${errText}`)
+            const errText = await response.text();
+            console.error('FIBO API Error:', response.status, errText);
+            throw new Error(`FIBO API Error: ${response.status} - ${errText}`);
         }
 
-        let result = await response.json()
+        const result = await response.json();
+        console.log('FIBO Response:', JSON.stringify(result, null, 2));
 
-        // Handle Polling if needed (Bria V2 is async)
-        if (result.status_url) {
-            let attempts = 0;
-            const maxAttempts = 60;
-
-            while (attempts < maxAttempts) {
-                const pollRes = await fetch(result.status_url, { headers: { 'api_token': briaApiToken! } })
-                if (!pollRes.ok) throw new Error('Bria status check failed')
-
-                const pollData = await pollRes.json()
-                if (pollData.status === 'completed') {
-                    result = pollData.result || pollData
-                    break;
-                }
-                if (pollData.status === 'failed') throw new Error('Bria generation failed')
-
-                await new Promise(r => setTimeout(r, 1000))
-                attempts++;
-            }
-        }
-
-        return new Response(JSON.stringify(result), {
+        // fal.ai returns: { image: { url, width, height }, structured_prompt: {...} }
+        return new Response(JSON.stringify({
+            image_url: result.image?.url || result.images?.[0]?.url,
+            structured_prompt: result.structured_prompt,
+            seed: result.seed,
+            raw: result,
+        }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         })
