@@ -178,42 +178,46 @@ serve(async (req) => {
             step: 'Initializing extraction...'
         });
 
-        // Call Bria V2 Structured Prompt
-        const briaRes = await fetch('https://engine.prod.bria-api.com/v2/structured_prompt/generate', {
+        // Call FIBO via fal.ai to extract structured prompt from image
+        // Docs: https://fal.ai/models/bria/fibo/generate
+        const falApiKey = Deno.env.get('FAL_KEY') || briaApiToken;
+
+        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+            status: 'processing',
+            progress: 20,
+            step: 'Analyzing image with FIBO...'
+        });
+
+        const fiboRes = await fetch('https://fal.run/fal-ai/bria-fibo', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'api_token': briaApiToken! },
-            body: JSON.stringify({ images: [imageUrl] })
-        })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Key ${falApiKey}`,
+            },
+            body: JSON.stringify({
+                image_url: imageUrl,
+                seed: Math.floor(Math.random() * 10000),
+                steps_num: 30,
+                sync_mode: true,  // Wait for result
+            })
+        });
 
-        if (!briaRes.ok) throw new Error(`Bria Error: ${briaRes.statusText}`)
-        let briaData = await briaRes.json()
-
-        // Polling Logic
-        if (briaData.status_url) {
-            let attempts = 0;
-            const maxAttempts = 30;
-
-            while (attempts < maxAttempts) {
-                await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
-                    status: 'processing',
-                    progress: 20 + (attempts * 2),
-                    step: 'Analyzing visual DNA...'
-                });
-
-                const pollRes = await fetch(briaData.status_url, { headers: { 'api_token': briaApiToken! } })
-                if (!pollRes.ok) throw new Error('Bria status check failed')
-
-                const pollData = await pollRes.json()
-                if (pollData.status === 'completed') {
-                    briaData = pollData.result || pollData
-                    break;
-                }
-                if (pollData.status === 'failed') throw new Error('Bria extraction failed')
-
-                await new Promise(r => setTimeout(r, 1000))
-                attempts++;
-            }
+        if (!fiboRes.ok) {
+            const errText = await fiboRes.text();
+            console.error('FIBO API Error:', fiboRes.status, errText);
+            throw new Error(`FIBO Error: ${fiboRes.status} - ${errText}`);
         }
+
+        const fiboData = await fiboRes.json();
+
+        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+            status: 'processing',
+            progress: 60,
+            step: 'Visual DNA extracted!'
+        });
+
+        // The structured_prompt is returned in the response
+        let extractedData = fiboData.structured_prompt || fiboData;
 
         // Process with Gemini to create clean, copyable JSON
         await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
@@ -222,9 +226,9 @@ serve(async (req) => {
             step: 'Converting to structured JSON...'
         });
 
-        let structuredPrompt = briaData;
+        let structuredPrompt = extractedData;
         if (geminiApiKey) {
-            structuredPrompt = await cleanWithGemini(briaData, geminiApiKey);
+            structuredPrompt = await cleanWithGemini(extractedData, geminiApiKey);
         }
 
         // Create Template with cleaned JSON
