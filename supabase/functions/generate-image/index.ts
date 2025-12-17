@@ -85,23 +85,38 @@ serve(async (req) => {
 
         if (action === 'generate_from_prompt') {
             // Use FIBO V2 with structured_prompt for precise control
+            // Per Bria docs: structured_prompt must be a STRING (JSON string)
             const structuredPrompt = data.structured_prompt
 
-            if (structuredPrompt && typeof structuredPrompt === 'object') {
-                // Pass the structured prompt directly to FIBO
+            if (structuredPrompt) {
+                // Convert to string if it's an object
+                const structuredPromptStr = typeof structuredPrompt === 'string'
+                    ? structuredPrompt
+                    : JSON.stringify(structuredPrompt);
+
+                // Per docs: can use structured_prompt alone, or with prompt for refinement
                 briaBody = {
-                    structured_prompt: JSON.stringify(structuredPrompt),
-                    prompt: data.prompt || structuredPrompt.short_description || "Generate an image",
-                    num_results: 1,
+                    structured_prompt: structuredPromptStr,
+                    sync: false
+                }
+
+                // Add refinement prompt if provided
+                if (data.prompt) {
+                    briaBody.prompt = data.prompt;
+                }
+
+                // Add seed if provided (for deterministic generation)
+                if (data.seed) {
+                    briaBody.seed = data.seed;
+                }
+            } else if (data.prompt) {
+                // Simple text prompt generation
+                briaBody = {
+                    prompt: data.prompt,
                     sync: false
                 }
             } else {
-                // Fallback to simple prompt
-                briaBody = {
-                    prompt: data.prompt || 'Generate an image',
-                    num_results: 1,
-                    sync: false
-                }
+                throw new Error('Either structured_prompt or prompt is required');
             }
         } else {
             briaBody = data
@@ -127,7 +142,7 @@ serve(async (req) => {
         let result = await response.json()
         console.log('Bria Response:', JSON.stringify(result, null, 2));
 
-        // Handle Polling if async
+        // Handle Polling if async (202 response with status_url)
         if (result.status_url) {
             let attempts = 0;
             const maxAttempts = 60;
@@ -140,20 +155,31 @@ serve(async (req) => {
                 console.log('Poll attempt', attempts, ':', pollData.status);
 
                 if (pollData.status === 'completed') {
-                    result = pollData.result || pollData
+                    // Per Bria docs: result contains { image_url, seed, structured_prompt }
+                    result = pollData;
                     break;
                 }
-                if (pollData.status === 'failed') throw new Error('Bria generation failed')
+                if (pollData.status === 'failed') {
+                    throw new Error('Bria generation failed: ' + (pollData.error?.message || 'Unknown error'))
+                }
 
                 await new Promise(r => setTimeout(r, 2000))
                 attempts++;
             }
         }
 
-        // Normalize response
+        // Per Bria docs: response is { result: { image_url, seed, structured_prompt } }
+        const imageUrl = result.result?.image_url || result.image_url;
+
+        if (!imageUrl) {
+            console.error('No image_url in response:', JSON.stringify(result, null, 2));
+            throw new Error('No image URL returned from Bria API');
+        }
+
         return new Response(JSON.stringify({
-            image_url: result.result?.[0]?.url || result.url || result.image_url,
-            images: result.result || result.images,
+            image_url: imageUrl,
+            seed: result.result?.seed || result.seed,
+            structured_prompt: result.result?.structured_prompt,
             raw: result,
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },

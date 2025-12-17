@@ -185,7 +185,8 @@ serve(async (req) => {
             step: 'Analyzing image with FIBO...'
         });
 
-        // Use the V2 structured_prompt/generate endpoint with inspire mode
+        // Use the V2 structured_prompt/generate endpoint
+        // Per docs: use "images" array to extract Visual DNA from reference image
         const briaRes = await fetch('https://engine.prod.bria-api.com/v2/structured_prompt/generate', {
             method: 'POST',
             headers: {
@@ -193,9 +194,8 @@ serve(async (req) => {
                 'api_token': briaApiToken!
             },
             body: JSON.stringify({
-                prompt: "Extract the visual DNA of this image",
-                image_url: imageUrl,
-                image_influence: 0.9
+                images: [imageUrl],  // Array of image URLs per Bria docs
+                sync: false
             })
         });
 
@@ -206,8 +206,9 @@ serve(async (req) => {
         }
 
         let briaData = await briaRes.json();
+        let structuredPromptStr: string = '';
 
-        // Polling if async
+        // Polling if async (202 response with status_url)
         if (briaData.status_url) {
             let attempts = 0;
             const maxAttempts = 60;
@@ -226,17 +227,27 @@ serve(async (req) => {
                 if (!pollRes.ok) throw new Error('Bria status check failed');
 
                 const pollData = await pollRes.json();
+                console.log('Poll response:', JSON.stringify(pollData, null, 2));
+
                 if (pollData.status === 'completed') {
-                    briaData = pollData.result || pollData;
+                    // Per Bria docs: result.structured_prompt is a STRING
+                    structuredPromptStr = pollData.result?.structured_prompt || '';
                     break;
                 }
                 if (pollData.status === 'failed') {
-                    throw new Error('Bria extraction failed');
+                    throw new Error('Bria extraction failed: ' + (pollData.error?.message || 'Unknown error'));
                 }
 
                 await new Promise(r => setTimeout(r, 2000));
                 attempts++;
             }
+        } else if (briaData.result?.structured_prompt) {
+            // Synchronous response (200)
+            structuredPromptStr = briaData.result.structured_prompt;
+        }
+
+        if (!structuredPromptStr) {
+            throw new Error('No structured prompt returned from Bria API');
         }
 
         await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
@@ -245,17 +256,21 @@ serve(async (req) => {
             step: 'Visual DNA extracted!'
         });
 
-        // Process with Gemini to create clean JSON
+        // Parse the structured_prompt string into JSON
+        let structuredPrompt: any;
+        try {
+            structuredPrompt = JSON.parse(structuredPromptStr);
+        } catch (e) {
+            console.error('Failed to parse structured_prompt:', e);
+            // If parsing fails, wrap the string
+            structuredPrompt = { raw_prompt: structuredPromptStr };
+        }
+
         await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
             status: 'processing',
             progress: 85,
-            step: 'Converting to structured JSON...'
+            step: 'Processing Visual DNA...'
         });
-
-        let structuredPrompt = briaData;
-        if (geminiApiKey) {
-            structuredPrompt = await cleanWithGemini(briaData, geminiApiKey);
-        }
 
         // Create Template
         const { data: template, error: temError } = await supabaseAdmin.from('Template')
