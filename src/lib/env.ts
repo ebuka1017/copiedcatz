@@ -5,10 +5,6 @@ const requiredEnvVars = [
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     'SUPABASE_SERVICE_ROLE_KEY',
     'JWT_SECRET',
-    'PUSHER_APP_ID',
-    'PUSHER_KEY',
-    'PUSHER_SECRET',
-    'NEXT_PUBLIC_PUSHER_CLUSTER',
     // 'BRIA_API_KEY', // Temporarily optional until we integrate real Bria
 ] as const;
 

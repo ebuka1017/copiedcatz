@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { callEdgeFunction } from '@/lib/supabase/client';
-import { subscribeToPusherChannel, unsubscribeFromPusherChannel } from '@/lib/pusher-client';
+import { callEdgeFunction, createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface ExtractionProgressEvent {
     status: 'processing' | 'completed' | 'failed';
@@ -22,33 +22,44 @@ export function useExtraction({ onComplete, onError }: UseExtractionProps = {}) 
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState<'idle' | 'uploading' | 'processing' | 'completed' | 'error'>('idle');
     const [currentCategory, setCurrentCategory] = useState<string>('');
-    const channelRef = useRef<ReturnType<typeof subscribeToPusherChannel> | null>(null);
+    const channelRef = useRef<RealtimeChannel | null>(null);
 
-    // Subscribe to Pusher events when user is available and extraction starts
+    // Subscribe to Supabase Realtime when user is available and extraction starts
     useEffect(() => {
         if (!user || status === 'idle') return;
 
-        const channelName = `user-${user.id}`;
-        const channel = subscribeToPusherChannel(channelName);
+        const supabase = createClient();
+        const channelName = `extraction-${user.id}`;
+
+        // Subscribe to the broadcast channel
+        const channel = supabase.channel(channelName);
+
+        channel
+            .on('broadcast', { event: 'extraction-progress' }, ({ payload }) => {
+                const data = payload as ExtractionProgressEvent;
+
+                setProgress(data.progress);
+                setCurrentCategory(data.step);
+
+                if (data.status === 'completed' && data.templateId) {
+                    setStatus('completed');
+                    setProgress(100);
+                    onComplete?.(data.templateId);
+                } else if (data.status === 'failed') {
+                    setStatus('error');
+                    onError?.(new Error('Extraction failed'));
+                }
+            })
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('Subscribed to extraction updates');
+                }
+            });
+
         channelRef.current = channel;
 
-        channel.bind('extraction-progress', (data: ExtractionProgressEvent) => {
-            setProgress(data.progress);
-            setCurrentCategory(data.step);
-
-            if (data.status === 'completed' && data.templateId) {
-                setStatus('completed');
-                setProgress(100);
-                onComplete?.(data.templateId);
-            } else if (data.status === 'failed') {
-                setStatus('error');
-                onError?.(new Error('Extraction failed'));
-            }
-        });
-
         return () => {
-            channel.unbind_all();
-            unsubscribeFromPusherChannel(channelName);
+            channel.unsubscribe();
             channelRef.current = null;
         };
     }, [user, status, onComplete, onError]);
@@ -67,7 +78,6 @@ export function useExtraction({ onComplete, onError }: UseExtractionProps = {}) 
             const { status: initialStatus, template_id, error } = data;
 
             // If the edge function returns immediately with completed status
-            // (happens when Pusher updates are faster than the response)
             if (initialStatus === 'COMPLETED' && template_id) {
                 setStatus('completed');
                 setProgress(100);
@@ -80,7 +90,7 @@ export function useExtraction({ onComplete, onError }: UseExtractionProps = {}) 
                 throw new Error(error || 'Extraction failed');
             }
 
-            // Otherwise, wait for Pusher events to update progress
+            // Otherwise, wait for Supabase Realtime events to update progress
             // The useEffect above handles the subscription
 
         } catch (error) {

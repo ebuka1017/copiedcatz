@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import Pusher from "npm:pusher"
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -8,6 +7,24 @@ const corsHeaders = {
 }
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-06-05:generateContent';
+
+/**
+ * Broadcast progress update via Supabase Realtime
+ */
+async function broadcastProgress(
+    supabase: any,
+    userId: string,
+    data: { status: string; progress: number; step: string; templateId?: string }
+) {
+    const channelName = `extraction-${userId}`;
+    const channel = supabase.channel(channelName);
+
+    await channel.send({
+        type: 'broadcast',
+        event: 'extraction-progress',
+        payload: data
+    });
+}
 
 /**
  * Use Gemini to convert raw FIBO output into clean, structured JSON
@@ -100,10 +117,6 @@ serve(async (req) => {
         const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
         const briaApiToken = Deno.env.get('BRIA_API_TOKEN')
         const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
-        const pusherAppId = Deno.env.get('PUSHER_APP_ID')
-        const pusherKey = Deno.env.get('PUSHER_KEY')
-        const pusherSecret = Deno.env.get('PUSHER_SECRET')
-        const pusherCluster = Deno.env.get('PUSHER_CLUSTER')
 
         if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey || !briaApiToken) {
             throw new Error('Missing Environment Variables')
@@ -116,14 +129,6 @@ serve(async (req) => {
         )
 
         const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey)
-
-        const pusher = new Pusher({
-            appId: pusherAppId!,
-            key: pusherKey!,
-            secret: pusherSecret!,
-            cluster: pusherCluster!,
-            useTLS: true,
-        });
 
         const {
             data: { user },
@@ -170,8 +175,8 @@ serve(async (req) => {
 
         const imageUrl = `${supabaseUrl}/storage/v1/object/public/uploads/${upload.filepath}`
 
-        // Trigger Pusher: Started
-        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+        // Broadcast: Started
+        await broadcastProgress(supabaseAdmin, user.id, {
             status: 'processing',
             progress: 10,
             step: 'Initializing extraction...'
@@ -179,7 +184,7 @@ serve(async (req) => {
 
         // Call Bria FIBO V2 API - Structured Prompt Generation (Inspire mode)
         // This extracts Visual DNA from the image
-        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+        await broadcastProgress(supabaseAdmin, user.id, {
             status: 'processing',
             progress: 20,
             step: 'Analyzing image with FIBO...'
@@ -214,7 +219,7 @@ serve(async (req) => {
             const maxAttempts = 60;
 
             while (attempts < maxAttempts) {
-                await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+                await broadcastProgress(supabaseAdmin, user.id, {
                     status: 'processing',
                     progress: 30 + Math.min(attempts * 2, 40),
                     step: 'Extracting Visual DNA...'
@@ -250,7 +255,7 @@ serve(async (req) => {
             throw new Error('No structured prompt returned from Bria API');
         }
 
-        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+        await broadcastProgress(supabaseAdmin, user.id, {
             status: 'processing',
             progress: 75,
             step: 'Visual DNA extracted!'
@@ -266,7 +271,7 @@ serve(async (req) => {
             structuredPrompt = { raw_prompt: structuredPromptStr };
         }
 
-        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+        await broadcastProgress(supabaseAdmin, user.id, {
             status: 'processing',
             progress: 85,
             step: 'Processing Visual DNA...'
@@ -287,7 +292,7 @@ serve(async (req) => {
 
         if (temError) throw temError
 
-        await pusher.trigger(`user-${user.id}`, 'extraction-progress', {
+        await broadcastProgress(supabaseAdmin, user.id, {
             status: 'completed',
             progress: 100,
             step: 'Extraction complete!',
