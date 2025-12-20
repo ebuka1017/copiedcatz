@@ -214,6 +214,9 @@ serve(async (req) => {
         let structuredPromptStr: string = '';
 
         // Polling if async (202 response with status_url)
+        let lastPollData: any = null;
+        let timedOut = false;
+
         if (briaData.status_url) {
             let attempts = 0;
             const maxAttempts = 60;
@@ -229,30 +232,66 @@ serve(async (req) => {
                     headers: { 'api_token': briaApiToken! }
                 });
 
-                if (!pollRes.ok) throw new Error('Bria status check failed');
+                if (!pollRes.ok) {
+                    const pollErrText = await pollRes.text();
+                    console.error('Bria status check failed:', pollRes.status, pollErrText);
+                    throw new Error(`Bria status check failed: ${pollRes.status}`);
+                }
 
                 const pollData = await pollRes.json();
+                lastPollData = pollData;
                 console.log('Poll response:', JSON.stringify(pollData, null, 2));
 
                 if (pollData.status === 'completed') {
                     // Per Bria docs: result.structured_prompt is a STRING
-                    structuredPromptStr = pollData.result?.structured_prompt || '';
+                    // Also check for alternative field names that Bria might use
+                    structuredPromptStr = pollData.result?.structured_prompt
+                        || pollData.structured_prompt
+                        || pollData.result?.prompt
+                        || '';
+
+                    if (!structuredPromptStr && pollData.result) {
+                        // Log the entire result object to understand the structure
+                        console.log('Bria result structure:', JSON.stringify(pollData.result, null, 2));
+                    }
                     break;
                 }
                 if (pollData.status === 'failed') {
-                    throw new Error('Bria extraction failed: ' + (pollData.error?.message || 'Unknown error'));
+                    throw new Error('Bria extraction failed: ' + (pollData.error?.message || pollData.message || 'Unknown error'));
                 }
 
                 await new Promise(r => setTimeout(r, 2000));
                 attempts++;
             }
+
+            if (attempts >= maxAttempts) {
+                timedOut = true;
+                console.error('Bria polling timed out after', maxAttempts, 'attempts. Last status:', lastPollData?.status);
+            }
         } else if (briaData.result?.structured_prompt) {
             // Synchronous response (200)
             structuredPromptStr = briaData.result.structured_prompt;
+        } else if (briaData.structured_prompt) {
+            // Alternative sync response structure
+            structuredPromptStr = briaData.structured_prompt;
         }
 
         if (!structuredPromptStr) {
-            throw new Error('No structured prompt returned from Bria API');
+            // Provide detailed error information for debugging
+            const debugInfo = {
+                timedOut,
+                hadStatusUrl: !!briaData.status_url,
+                lastPollStatus: lastPollData?.status,
+                briaResponseKeys: Object.keys(briaData),
+                lastPollDataKeys: lastPollData ? Object.keys(lastPollData) : null,
+                resultKeys: lastPollData?.result ? Object.keys(lastPollData.result) : (briaData.result ? Object.keys(briaData.result) : null)
+            };
+            console.error('No structured prompt found. Debug info:', JSON.stringify(debugInfo, null, 2));
+
+            if (timedOut) {
+                throw new Error('Bria API timed out after 2 minutes. Please try again.');
+            }
+            throw new Error('No structured prompt returned from Bria API. Status: ' + (lastPollData?.status || 'unknown'));
         }
 
         await broadcastProgress(supabaseAdmin, user.id, {
