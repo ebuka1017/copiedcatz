@@ -175,6 +175,14 @@ serve(async (req) => {
 
         const imageUrl = `${supabaseUrl}/storage/v1/object/public/uploads/${upload.filepath}`
 
+        // Verify image is accessible before sending to Bria
+        const imageCheck = await fetch(imageUrl, { method: 'HEAD' });
+        if (!imageCheck.ok) {
+            console.error('Image not accessible:', imageUrl, 'Status:', imageCheck.status);
+            throw new Error(`Image not accessible (status ${imageCheck.status}). The image may have been deleted or is not public.`);
+        }
+        console.log('Image verified accessible:', imageUrl);
+
         // Broadcast: Started
         await broadcastProgress(supabaseAdmin, user.id, {
             status: 'processing',
@@ -242,7 +250,9 @@ serve(async (req) => {
                 lastPollData = pollData;
                 console.log('Poll response:', JSON.stringify(pollData, null, 2));
 
-                if (pollData.status === 'completed') {
+                const statusLower = (pollData.status || '').toLowerCase();
+
+                if (statusLower === 'completed') {
                     // Per Bria docs: result.structured_prompt is a STRING
                     // Also check for alternative field names that Bria might use
                     structuredPromptStr = pollData.result?.structured_prompt
@@ -250,13 +260,14 @@ serve(async (req) => {
                         || pollData.result?.prompt
                         || '';
 
-                    if (!structuredPromptStr && pollData.result) {
-                        // Log the entire result object to understand the structure
-                        console.log('Bria result structure:', JSON.stringify(pollData.result, null, 2));
+                    if (!structuredPromptStr) {
+                        // Log the entire response to understand the structure
+                        console.log('Bria completed but no structured_prompt. Full response:', JSON.stringify(pollData, null, 2));
                     }
                     break;
                 }
-                if (pollData.status === 'failed') {
+                if (statusLower === 'failed') {
+                    console.error('Bria failed response:', JSON.stringify(pollData, null, 2));
                     throw new Error('Bria extraction failed: ' + (pollData.error?.message || pollData.message || 'Unknown error'));
                 }
 
