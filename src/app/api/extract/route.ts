@@ -66,8 +66,8 @@ export async function POST(req: Request) {
         const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${upload.filepath}`;
 
         try {
-            const curModule = await import('@/lib/bria/client');
-            const result = await curModule.generateStructuredPrompt({
+            const { generateStructuredPromptServer } = await import('@/lib/bria/server');
+            const result = await generateStructuredPromptServer({
                 prompt: undefined, // Image only extraction
                 images: [imageUrl]
             });

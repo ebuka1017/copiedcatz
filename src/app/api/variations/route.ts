@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { generateImageV2 } from '@/lib/bria/client';
+import { generateImageV2Server } from '@/lib/bria/server';
 
 export async function POST(req: Request) {
     try {
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
         try {
             const startTime = Date.now();
-            const result = await generateImageV2({
+            const result = await generateImageV2Server({
                 structured_prompt,
                 seed,
                 sync: true // Force sync for now, consistent with current architecture
