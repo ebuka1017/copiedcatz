@@ -95,9 +95,10 @@ serve(async (req) => {
                     : JSON.stringify(structuredPrompt);
 
                 // Per docs: can use structured_prompt alone, or with prompt for refinement
+                // Use sync: true to get result directly without polling
                 briaBody = {
                     structured_prompt: structuredPromptStr,
-                    sync: false
+                    sync: true
                 }
 
                 // Add refinement prompt if provided
@@ -113,7 +114,7 @@ serve(async (req) => {
                 // Simple text prompt generation
                 briaBody = {
                     prompt: data.prompt,
-                    sync: false
+                    sync: true
                 }
             } else {
                 throw new Error('Either structured_prompt or prompt is required');
