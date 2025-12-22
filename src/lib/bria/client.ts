@@ -24,14 +24,19 @@ async function pollStatus(statusUrl: string): Promise<any> {
 }
 
 export async function generateImageV2(request: GenerateImageRequest): Promise<GenerateImageResponse> {
+    console.log('[generateImageV2] Calling edge function with request:', request);
+
     const data = await callEdgeFunction('generate-image', {
         body: { action: 'generate_from_prompt', data: request },
         method: 'POST'
     });
 
+    console.log('[generateImageV2] Raw edge function response:', data);
+
     // If sync is requested or if we see a status_url, we might want to poll?
     // The previous implementation polled if `request.sync` was true.
     if (request.sync && data.status_url) {
+        console.log('[generateImageV2] Polling status URL:', data.status_url);
         return await pollStatus(data.status_url);
     }
 
