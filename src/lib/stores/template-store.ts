@@ -232,6 +232,7 @@ export const useTemplateStore = create<TemplateState>()(
                         try {
                             const actualSeed = seed ?? Math.floor(Math.random() * 1000000);
                             const startTime = Date.now();
+                            console.log('[generateVariation] Starting generation with seed:', actualSeed);
 
                             // Call edge function directly from client (has session access)
                             const result = await generateImageV2({
@@ -240,6 +241,7 @@ export const useTemplateStore = create<TemplateState>()(
                                 sync: true
                             });
 
+                            console.log('[generateVariation] Edge function response:', result);
                             const generationTime = Date.now() - startTime;
 
                             // Extract image URL from result
@@ -249,8 +251,11 @@ export const useTemplateStore = create<TemplateState>()(
                             } else if (result.result && result.result.length > 0) {
                                 imageUrl = result.result[0].url;
                             } else {
+                                console.error('[generateVariation] No image_url in result:', result);
                                 throw new Error('No image returned from Bria');
                             }
+
+                            console.log('[generateVariation] Extracted image URL:', imageUrl);
 
                             // Save variation to database via API
                             const response = await fetch('/api/variations', {
@@ -267,21 +272,24 @@ export const useTemplateStore = create<TemplateState>()(
 
                             if (!response.ok) {
                                 const error = await response.json();
+                                console.error('[generateVariation] Save variation failed:', error);
                                 throw new Error(error.message || 'Failed to save variation');
                             }
 
                             const variation: Variation = await response.json();
+                            console.log('[generateVariation] Saved variation:', variation);
 
                             set((state) => {
                                 if (state.template) {
                                     state.template.variations.push(variation);
+                                    console.log('[generateVariation] Updated variations count:', state.template.variations.length);
                                 }
                             });
 
                             return variation;
 
                         } catch (error) {
-                            console.error('Generation failed:', error);
+                            console.error('[generateVariation] Failed:', error);
                             throw error;
                         } finally {
                             set({ isGenerating: false });

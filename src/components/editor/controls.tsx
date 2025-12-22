@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useTemplateStore, StructuredPrompt } from '@/lib/stores/template-store';
-import { Wand2 } from 'lucide-react';
+import { Wand2, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 
 const CATEGORIES: { key: keyof StructuredPrompt; label: string; icon: string }[] = [
@@ -18,15 +18,18 @@ const CATEGORIES: { key: keyof StructuredPrompt; label: string; icon: string }[]
 export function Controls() {
     const { template, updatePrompt, generateVariation, isGenerating } = useTemplateStore();
     const [activeCategory, setActiveCategory] = useState<keyof StructuredPrompt>('lighting');
+    const [error, setError] = useState<string | null>(null);
 
     if (!template) return null;
 
     const handleGenerate = async () => {
+        setError(null);
         try {
             await generateVariation();
-        } catch (error) {
-            // Error handling would go here (toast)
-            console.error(error);
+        } catch (err: any) {
+            const message = err?.message || 'Generation failed';
+            setError(message);
+            console.error('[Controls] Generation error:', err);
         }
     };
 
@@ -177,6 +180,25 @@ export function Controls() {
                     )}
                 </div>
             </Card>
+
+            {/* Error Display */}
+            {error && (
+                <Card className="p-3 bg-red-900/30 border-red-700">
+                    <div className="flex items-start gap-2 text-red-300">
+                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                            <p className="text-sm font-medium">Generation Failed</p>
+                            <p className="text-xs opacity-80 mt-1">{error}</p>
+                        </div>
+                        <button
+                            onClick={() => setError(null)}
+                            className="text-red-400 hover:text-red-200 text-sm"
+                        >
+                            Dismiss
+                        </button>
+                    </div>
+                </Card>
+            )}
 
             {/* Generate Button */}
             <Button

@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { useTemplateStore } from '@/lib/stores/template-store';
 import { useOptimisticGeneration } from '@/lib/hooks/use-optimistic-generation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ImageOff } from 'lucide-react';
 
 export function Canvas() {
@@ -11,14 +11,19 @@ export function Canvas() {
     const optimisticState = useOptimisticGeneration();
     const [imageError, setImageError] = useState(false);
 
-    if (!template) return null;
-
     // Determine which image to show:
     // 1. Latest variation
     // 2. Original image
-    const variations = template.variations || [];
+    const variations = template?.variations || [];
     const latestVariation = variations[variations.length - 1];
-    const displayImage = latestVariation?.image_url || template.original_image_url;
+    const displayImage = latestVariation?.image_url || template?.original_image_url;
+
+    // Reset error state when the displayed image changes
+    useEffect(() => {
+        setImageError(false);
+    }, [displayImage]);
+
+    if (!template) return null;
 
     return (
         <Card className="h-full flex items-center justify-center p-8 relative overflow-hidden group bg-slate-900 border-slate-800">
