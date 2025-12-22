@@ -95,18 +95,22 @@ export async function POST(req: Request) {
         }
 
         // Deduct credit
-        // Manual decrement since no atomic increment in JS SDK update (without RPC)
         const newCredits = userRecord.credits_remaining - 1;
-        await db.from('User')
+        const { error: creditError } = await db.from('User')
             .update({ credits_remaining: newCredits })
             .eq('id', user.id);
 
+        if (creditError) {
+            console.error('Credit deduction error:', creditError);
+            // Still return the variation - it was created successfully
+        }
+
         return NextResponse.json(variation);
 
-    } catch (error) {
-        console.error('Generation error:', error);
+    } catch (error: any) {
+        console.error('Generation error:', error?.message || error);
         return NextResponse.json(
-            { error: 'Failed to generate variation' },
+            { error: error?.message || 'Failed to generate variation' },
             { status: 500 }
         );
     }
