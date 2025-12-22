@@ -69,6 +69,10 @@ export interface GenerateImageRequest {
 }
 
 export interface GenerateImageResponse {
+    // Direct response from edge function
+    image_url?: string;
+    seed?: number;
+    // Standard Bria API response format
     result?: {
         id: string;
         url: string;

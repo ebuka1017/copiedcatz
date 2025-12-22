@@ -48,7 +48,12 @@ export async function POST(req: Request) {
             });
             generationTime = Date.now() - startTime;
 
-            if (result.result && result.result.length > 0) {
+            // Handle both response formats:
+            // - Edge function returns: { image_url: string }
+            // - Direct Bria API returns: { result: [{ url: string }] }
+            if (result.image_url) {
+                imageUrl = result.image_url;
+            } else if (result.result && result.result.length > 0) {
                 imageUrl = result.result[0].url;
             } else {
                 throw new Error('No image returned from Bria');
