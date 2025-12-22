@@ -53,12 +53,15 @@ export async function callEdgeFunctionServer(
         method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
     }
 ): Promise<any> {
+    console.log('[EdgeFn] Getting session for:', functionName);
     const supabase = await createClient();
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.access_token) {
+        console.error('[EdgeFn] No session/token found');
         throw new Error('Not authenticated. Please log in again.');
     }
+    console.log('[EdgeFn] Session OK, calling edge function...');
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zljkcihttlwnvriycokw.supabase.co';
     const url = `${supabaseUrl}/functions/v1/${functionName}`;
@@ -72,10 +75,15 @@ export async function callEdgeFunctionServer(
         body: options?.body ? JSON.stringify(options.body) : undefined,
     });
 
+    console.log('[EdgeFn] Response status:', response.status);
+
     if (!response.ok) {
         const errorText = await response.text();
+        console.error('[EdgeFn] Error:', response.status, errorText.substring(0, 200));
         throw new Error(`Edge function error: ${response.status} - ${errorText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('[EdgeFn] Success, keys:', Object.keys(data));
+    return data;
 }

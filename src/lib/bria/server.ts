@@ -28,13 +28,16 @@ async function pollStatusServer(statusUrl: string): Promise<any> {
 }
 
 export async function generateImageV2Server(request: GenerateImageRequest): Promise<GenerateImageResponse> {
+    console.log('[BriaServer] Calling edge function generate-image...');
     const data = await callEdgeFunctionServer('generate-image', {
         body: { action: 'generate_from_prompt', data: request },
         method: 'POST'
     });
+    console.log('[BriaServer] Edge function response:', JSON.stringify(data).substring(0, 200));
 
     // If sync is requested and status_url exists, poll for result
     if (request.sync && data.status_url) {
+        console.log('[BriaServer] Polling status_url...');
         return await pollStatusServer(data.status_url);
     }
 
