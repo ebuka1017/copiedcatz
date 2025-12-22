@@ -9,7 +9,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { template_id, structured_prompt, seed } = await req.json();
+        const { template_id, image_url, seed, structured_prompt, generation_time_ms } = await req.json();
+
+        if (!template_id || !image_url) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
 
         // Verify template ownership
         const { data: template, error: temError } = await db.from('Template')
@@ -21,49 +25,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Template not found' }, { status: 404 });
         }
 
-        // Call Bria AI API - use same approach as DNA extraction (dynamic import of client)
-        let imageUrl: string;
-        let generationTime = 0;
-
-        try {
-            const startTime = Date.now();
-            const briaClient = await import('@/lib/bria/client');
-            const result = await briaClient.generateImageV2({
-                structured_prompt,
-                seed,
-                sync: true
-            });
-            generationTime = Date.now() - startTime;
-
-            // Check for error response
-            if ((result as any).error) {
-                throw new Error((result as any).error);
-            }
-
-            // Extract image URL
-            if (result.image_url) {
-                imageUrl = result.image_url;
-            } else if (result.result && result.result.length > 0) {
-                imageUrl = result.result[0].url;
-            } else {
-                throw new Error('No image returned from Bria');
-            }
-        } catch (briaError: any) {
-            console.error('Bria generation failed:', briaError);
-            return NextResponse.json(
-                { error: briaError.message || 'Failed to generate image' },
-                { status: 502 }
-            );
-        }
-
         // Store variation
         const { data: variation, error: varError } = await db.from('Variation')
             .insert({
                 template_id,
-                image_url: imageUrl,
-                seed,
+                image_url,
+                seed: seed || 0,
                 modified_prompt: structured_prompt,
-                generation_time_ms: generationTime,
+                generation_time_ms: generation_time_ms || 0,
                 created_at: new Date().toISOString(),
             })
             .select()
@@ -80,9 +49,9 @@ export async function POST(req: Request) {
         return NextResponse.json(variation);
 
     } catch (error: any) {
-        console.error('Generation error:', error);
+        console.error('Save variation error:', error);
         return NextResponse.json(
-            { error: error?.message || 'Failed to generate variation' },
+            { error: error?.message || 'Failed to save variation' },
             { status: 500 }
         );
     }
