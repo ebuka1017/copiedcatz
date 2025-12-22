@@ -41,3 +41,41 @@ export function createAdminClient() {
         }
     );
 }
+
+/**
+ * Call a Supabase Edge Function from server-side (API routes)
+ * Uses the server client to get the session from cookies
+ */
+export async function callEdgeFunctionServer(
+    functionName: string,
+    options?: {
+        body?: Record<string, unknown>;
+        method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    }
+): Promise<any> {
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+        throw new Error('Not authenticated. Please log in again.');
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zljkcihttlwnvriycokw.supabase.co';
+    const url = `${supabaseUrl}/functions/v1/${functionName}`;
+
+    const response = await fetch(url, {
+        method: options?.method || 'POST',
+        headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+        },
+        body: options?.body ? JSON.stringify(options.body) : undefined,
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Edge function error: ${response.status} - ${errorText}`);
+    }
+
+    return response.json();
+}

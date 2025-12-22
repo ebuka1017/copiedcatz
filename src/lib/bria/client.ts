@@ -25,7 +25,7 @@ async function pollStatus(statusUrl: string): Promise<any> {
 
 export async function generateImageV2(request: GenerateImageRequest): Promise<GenerateImageResponse> {
     const data = await callEdgeFunction('generate-image', {
-        body: { action: 'generate_image', data: request },
+        body: { action: 'generate_from_prompt', data: request },
         method: 'POST'
     });
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { generateImageV2 } from '@/lib/bria/client';
+import { generateImageV2Server } from '@/lib/bria/server';
 
 export async function POST(req: Request) {
     try {
@@ -41,22 +41,34 @@ export async function POST(req: Request) {
 
         try {
             const startTime = Date.now();
-            const result = await generateImageV2({
+            const result = await generateImageV2Server({
                 structured_prompt,
                 seed,
                 sync: true // Force sync for now, consistent with current architecture
             });
             generationTime = Date.now() - startTime;
 
-            if (result.result && result.result.length > 0) {
+            // Check for error response from edge function
+            if ((result as any).error) {
+                console.error('Edge function error:', (result as any).error);
+                throw new Error((result as any).error);
+            }
+
+            // Handle both response formats:
+            // - Edge function returns: { image_url: string }
+            // - Direct Bria API returns: { result: [{ url: string }] }
+            if (result.image_url) {
+                imageUrl = result.image_url;
+            } else if (result.result && result.result.length > 0) {
                 imageUrl = result.result[0].url;
             } else {
+                console.error('Unexpected Bria response:', JSON.stringify(result));
                 throw new Error('No image returned from Bria');
             }
-        } catch (briaError) {
+        } catch (briaError: any) {
             console.error('Bria generation failed:', briaError);
             return NextResponse.json(
-                { error: 'Failed to generate image with Bria' },
+                { error: briaError.message || 'Failed to generate image with Bria' },
                 { status: 502 }
             );
         }
