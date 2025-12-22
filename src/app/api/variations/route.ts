@@ -86,7 +86,13 @@ export async function POST(req: Request) {
             .select()
             .single();
 
-        if (varError) throw varError;
+        if (varError) {
+            console.error('Variation insert error:', varError);
+            return NextResponse.json(
+                { error: `Database error: ${varError.message}` },
+                { status: 500 }
+            );
+        }
 
         // Deduct credit
         // Manual decrement since no atomic increment in JS SDK update (without RPC)
