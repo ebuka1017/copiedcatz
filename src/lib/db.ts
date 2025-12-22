@@ -5,3 +5,7 @@ import { createAdminClient } from '@/lib/supabase/server';
 export function getDb() {
     return createAdminClient();
 }
+
+// For backward compatibility - used by most API routes
+// Creates a new client instance (safe because createAdminClient is lightweight)
+export const db = createAdminClient();
