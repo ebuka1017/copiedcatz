@@ -3,6 +3,7 @@ import { devtools, persist, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { debounce } from 'lodash-es';
 import { useEffect, useState } from 'react';
+import { generateImageV2 } from '@/lib/bria/client';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -229,19 +230,44 @@ export const useTemplateStore = create<TemplateState>()(
                         set({ isGenerating: true });
 
                         try {
+                            const actualSeed = seed ?? Math.floor(Math.random() * 1000000);
+                            const startTime = Date.now();
+
+                            // Call edge function directly from client (has session access)
+                            const result = await generateImageV2({
+                                structured_prompt: template.structured_prompt,
+                                seed: actualSeed,
+                                sync: true
+                            });
+
+                            const generationTime = Date.now() - startTime;
+
+                            // Extract image URL from result
+                            let imageUrl: string;
+                            if (result.image_url) {
+                                imageUrl = result.image_url;
+                            } else if (result.result && result.result.length > 0) {
+                                imageUrl = result.result[0].url;
+                            } else {
+                                throw new Error('No image returned from Bria');
+                            }
+
+                            // Save variation to database via API
                             const response = await fetch('/api/variations', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     template_id: template.id,
+                                    image_url: imageUrl,
+                                    seed: actualSeed,
                                     structured_prompt: template.structured_prompt,
-                                    seed: seed ?? Math.floor(Math.random() * 1000000),
+                                    generation_time_ms: generationTime,
                                 }),
                             });
 
                             if (!response.ok) {
                                 const error = await response.json();
-                                throw new Error(error.message || 'Generation failed');
+                                throw new Error(error.message || 'Failed to save variation');
                             }
 
                             const variation: Variation = await response.json();
