@@ -21,16 +21,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Template not found' }, { status: 404 });
         }
 
-        // Check credits
-        const { data: userRecord, error: userError } = await db.from('User')
-            .select('credits_remaining')
-            .eq('id', user.id)
-            .single();
-
-        if (userError || !userRecord || userRecord.credits_remaining <= 0) {
-            return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
-        }
-
         // Call Bria AI API - use same approach as DNA extraction (dynamic import of client)
         let imageUrl: string;
         let generationTime = 0;
@@ -86,12 +76,6 @@ export async function POST(req: Request) {
                 { status: 500 }
             );
         }
-
-        // Deduct credit
-        const newCredits = userRecord.credits_remaining - 1;
-        await db.from('User')
-            .update({ credits_remaining: newCredits })
-            .eq('id', user.id);
 
         return NextResponse.json(variation);
 
