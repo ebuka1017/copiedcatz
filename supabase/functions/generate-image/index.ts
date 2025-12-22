@@ -6,6 +6,59 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+/**
+ * Download image from URL and upload to Supabase Storage for permanent storage
+ */
+async function saveImageToStorage(
+    imageUrl: string,
+    userId: string,
+    supabaseUrl: string,
+    serviceRoleKey: string
+): Promise<string> {
+    console.log('Downloading image from Bria...');
+
+    // Download the image
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+        throw new Error(`Failed to download image: ${imageResponse.status}`);
+    }
+
+    const imageBlob = await imageResponse.blob();
+    const contentType = imageResponse.headers.get('content-type') || 'image/png';
+    const extension = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
+
+    // Create admin client for storage upload
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+    });
+
+    // Generate unique filename: variations/{user_id}/{timestamp}_{random}.{ext}
+    const timestamp = Date.now();
+    const random = crypto.randomUUID().substring(0, 8);
+    const filepath = `variations/${userId}/${timestamp}_${random}.${extension}`;
+
+    console.log('Uploading to storage:', filepath);
+
+    // Upload to Supabase Storage
+    const { data, error } = await adminClient.storage
+        .from('uploads')
+        .upload(filepath, imageBlob, {
+            contentType,
+            upsert: false
+        });
+
+    if (error) {
+        console.error('Storage upload error:', error);
+        throw new Error(`Failed to upload image: ${error.message}`);
+    }
+
+    // Return public URL
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/uploads/${filepath}`;
+    console.log('Image saved permanently:', publicUrl);
+
+    return publicUrl;
+}
+
 serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
@@ -14,6 +67,7 @@ serve(async (req) => {
     try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')
         const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+        const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
         const briaApiToken = Deno.env.get('BRIA_API_TOKEN')
 
         if (!supabaseUrl || !supabaseAnonKey || !briaApiToken) {
@@ -191,8 +245,22 @@ serve(async (req) => {
             throw new Error('No image URL returned from Bria API');
         }
 
+        // Save image to Supabase Storage for permanent URL (if service role key is available)
+        let permanentUrl = imageUrl;
+        if (serviceRoleKey) {
+            try {
+                permanentUrl = await saveImageToStorage(imageUrl, user.id, supabaseUrl, serviceRoleKey);
+            } catch (storageError: any) {
+                // Log but don't fail - fall back to temporary Bria URL
+                console.error('Failed to save to storage, using temporary URL:', storageError.message);
+            }
+        } else {
+            console.warn('No SUPABASE_SERVICE_ROLE_KEY - using temporary Bria URL');
+        }
+
         return new Response(JSON.stringify({
-            image_url: imageUrl,
+            image_url: permanentUrl,
+            original_bria_url: imageUrl !== permanentUrl ? imageUrl : undefined,
             seed: result.result?.seed || result.seed,
             structured_prompt: result.result?.structured_prompt,
             raw: result,
