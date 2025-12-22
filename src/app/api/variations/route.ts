@@ -48,6 +48,12 @@ export async function POST(req: Request) {
             });
             generationTime = Date.now() - startTime;
 
+            // Check for error response from edge function
+            if ((result as any).error) {
+                console.error('Edge function error:', (result as any).error);
+                throw new Error((result as any).error);
+            }
+
             // Handle both response formats:
             // - Edge function returns: { image_url: string }
             // - Direct Bria API returns: { result: [{ url: string }] }
@@ -56,12 +62,13 @@ export async function POST(req: Request) {
             } else if (result.result && result.result.length > 0) {
                 imageUrl = result.result[0].url;
             } else {
+                console.error('Unexpected Bria response:', JSON.stringify(result));
                 throw new Error('No image returned from Bria');
             }
-        } catch (briaError) {
+        } catch (briaError: any) {
             console.error('Bria generation failed:', briaError);
             return NextResponse.json(
-                { error: 'Failed to generate image with Bria' },
+                { error: briaError.message || 'Failed to generate image with Bria' },
                 { status: 502 }
             );
         }
