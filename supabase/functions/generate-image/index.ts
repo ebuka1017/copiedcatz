@@ -95,9 +95,10 @@ serve(async (req) => {
                     : JSON.stringify(structuredPrompt);
 
                 // Per docs: can use structured_prompt alone, or with prompt for refinement
+                // Use sync: true to get result directly without polling
                 briaBody = {
                     structured_prompt: structuredPromptStr,
-                    sync: false
+                    sync: true
                 }
 
                 // Add refinement prompt if provided
@@ -113,7 +114,7 @@ serve(async (req) => {
                 // Simple text prompt generation
                 briaBody = {
                     prompt: data.prompt,
-                    sync: false
+                    sync: true
                 }
             } else {
                 throw new Error('Either structured_prompt or prompt is required');
@@ -168,8 +169,22 @@ serve(async (req) => {
             }
         }
 
-        // Per Bria docs: response is { result: { image_url, seed, structured_prompt } }
-        const imageUrl = result.result?.image_url || result.image_url;
+        // Per Bria docs: response could be:
+        // - { result: { image_url, seed } } for object format
+        // - { result: [{ url, seed }] } for array format
+        let imageUrl: string | undefined;
+
+        if (result.result) {
+            if (Array.isArray(result.result)) {
+                // Array format: result.result[0].url
+                imageUrl = result.result[0]?.url || result.result[0]?.image_url;
+            } else {
+                // Object format: result.result.image_url
+                imageUrl = result.result.image_url || result.result.url;
+            }
+        }
+        // Fallback to top-level
+        imageUrl = imageUrl || result.image_url || result.url;
 
         if (!imageUrl) {
             console.error('No image_url in response:', JSON.stringify(result, null, 2));
