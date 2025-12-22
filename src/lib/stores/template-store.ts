@@ -6,6 +6,15 @@ import { useEffect, useState } from 'react';
 import { generateImageV2 } from '@/lib/bria/client';
 
 // ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+// Safe deep clone that works with plain objects (unlike deepClone which can fail)
+function deepClone<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+// ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
@@ -148,7 +157,7 @@ export const useTemplateStore = create<TemplateState>()(
 
                             const newHistory = state.history.slice(0, state.historyIndex + 1);
                             newHistory.push({
-                                prompt: structuredClone(currentPrompt),
+                                prompt: deepClone(currentPrompt),
                                 timestamp: Date.now()
                             });
 
@@ -171,7 +180,7 @@ export const useTemplateStore = create<TemplateState>()(
                             state.template = template;
                             // Initialize history with first state
                             state.history = [{
-                                prompt: structuredClone(template.structured_prompt),
+                                prompt: deepClone(template.structured_prompt),
                                 timestamp: Date.now()
                             }];
                             state.historyIndex = 0;
@@ -327,7 +336,7 @@ export const useTemplateStore = create<TemplateState>()(
                             const newIndex = historyIndex - 1;
                             set((state) => {
                                 if (state.template) {
-                                    state.template.structured_prompt = structuredClone(
+                                    state.template.structured_prompt = deepClone(
                                         history[newIndex].prompt
                                     );
                                     state.template.updated_at = new Date();
@@ -345,7 +354,7 @@ export const useTemplateStore = create<TemplateState>()(
                             const newIndex = historyIndex + 1;
                             set((state) => {
                                 if (state.template) {
-                                    state.template.structured_prompt = structuredClone(
+                                    state.template.structured_prompt = deepClone(
                                         history[newIndex].prompt
                                     );
                                     state.template.updated_at = new Date();
@@ -363,7 +372,7 @@ export const useTemplateStore = create<TemplateState>()(
                         set((state) => {
                             if (state.template) {
                                 state.history = [{
-                                    prompt: structuredClone(state.template.structured_prompt),
+                                    prompt: deepClone(state.template.structured_prompt),
                                     timestamp: Date.now()
                                 }];
                                 state.historyIndex = 0;
