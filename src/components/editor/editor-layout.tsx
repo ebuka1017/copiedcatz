@@ -12,7 +12,7 @@ interface EditorLayoutProps {
 }
 
 export function EditorLayout({ children }: EditorLayoutProps) {
-    const { undo, redo, canUndo, canRedo, saveTemplate, isGenerating } = useTemplateStore();
+    const { canvasUndo, canvasRedo, canCanvasUndo, canCanvasRedo, saveTemplate, isGenerating } = useTemplateStore();
     useUnsavedChanges();
 
     return (
@@ -34,16 +34,16 @@ export function EditorLayout({ children }: EditorLayoutProps) {
                     <div className="flex items-center gap-2">
                         <Button
                             variant="secondary"
-                            onClick={undo}
-                            disabled={!canUndo()}
+                            onClick={canvasUndo}
+                            disabled={!canCanvasUndo()}
                             title="Undo (Cmd+Z)"
                         >
                             <Undo className="w-4 h-4" />
                         </Button>
                         <Button
                             variant="secondary"
-                            onClick={redo}
-                            disabled={!canRedo()}
+                            onClick={canvasRedo}
+                            disabled={!canCanvasRedo()}
                             title="Redo (Cmd+Shift+Z)"
                         >
                             <Redo className="w-4 h-4" />
