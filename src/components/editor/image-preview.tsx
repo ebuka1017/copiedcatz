@@ -8,15 +8,14 @@ import buttonStyles from '@/components/ui/glass-button.module.css';
 import { useState } from 'react';
 
 export function ImagePreview() {
-    const { template, isGenerating, addVariation } = useTemplateStore();
+    const { template, isGenerating, addVariation, currentVariationIndex } = useTemplateStore();
     const [isProcessing, setIsProcessing] = useState(false);
 
     if (!template) return null;
 
-    // Get latest variation or original
-    const currentImage = template.variations.length > 0
-        ? template.variations[template.variations.length - 1].image_url
-        : template.original_image_url;
+    // Get current variation based on index, or original if -1
+    const currentVariation = currentVariationIndex >= 0 ? template.variations[currentVariationIndex] : null;
+    const currentImage = currentVariation?.image_url || template.original_image_url;
 
     const handleTool = async (tool: 'upscale' | 'remove-bg') => {
         if (!currentImage || isProcessing) return;
@@ -70,8 +69,8 @@ export function ImagePreview() {
 
             <div className="mt-4 flex justify-between items-center">
                 <div className="text-sm text-slate-400">
-                    {template.variations.length > 0
-                        ? `Variation #${template.variations.length}`
+                    {currentVariationIndex >= 0
+                        ? `Variation #${currentVariationIndex + 1}`
                         : 'Original Image'}
                 </div>
 
