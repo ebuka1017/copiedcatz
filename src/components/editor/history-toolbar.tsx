@@ -8,13 +8,13 @@ import { useShallow } from 'zustand/react/shallow';
 
 export function HistoryToolbar() {
     const {
-        undo, redo, canUndo, canRedo,
+        canvasUndo, canvasRedo, canCanvasUndo, canCanvasRedo,
         saveTemplate, generateVariation, isGenerating
     } = useTemplateStore(useShallow(state => ({
-        undo: state.undo,
-        redo: state.redo,
-        canUndo: state.canUndo,
-        canRedo: state.canRedo,
+        canvasUndo: state.canvasUndo,
+        canvasRedo: state.canvasRedo,
+        canCanvasUndo: state.canCanvasUndo,
+        canCanvasRedo: state.canCanvasRedo,
         saveTemplate: state.saveTemplate,
         generateVariation: state.generateVariation,
         isGenerating: state.isGenerating
@@ -27,16 +27,16 @@ export function HistoryToolbar() {
         <div className="h-16 flex items-center justify-between px-6 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
             <div className="flex items-center gap-2">
                 <button
-                    onClick={undo}
-                    disabled={!canUndo()}
+                    onClick={canvasUndo}
+                    disabled={!canCanvasUndo()}
                     className="p-2 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                     title="Undo (Cmd+Z)"
                 >
                     <Undo2 className="w-5 h-5 text-slate-300" />
                 </button>
                 <button
-                    onClick={redo}
-                    disabled={!canRedo()}
+                    onClick={canvasRedo}
+                    disabled={!canCanvasRedo()}
                     className="p-2 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                     title="Redo (Cmd+Shift+Z)"
                 >

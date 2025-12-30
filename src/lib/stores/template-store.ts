@@ -60,7 +60,10 @@ interface TemplateState {
     isGenerating: boolean;
     extractionProgress: number;
 
-    // History management (50-step circular buffer)
+    // Canvas history (which variation is displayed)
+    currentVariationIndex: number; // -1 means show original, 0+ means show variations[index]
+
+    // Prompt history management (50-step circular buffer) - for editing tools
     history: HistoryState[];
     historyIndex: number;
     maxHistoryLength: number;
@@ -86,7 +89,14 @@ interface TemplateState {
     generateVariation: (seed?: number) => Promise<Variation>;
     deleteVariation: (variationId: string) => void;
 
-    // History
+    // Canvas History (variation navigation - separate from editing tools)
+    canvasUndo: () => void;
+    canvasRedo: () => void;
+    canCanvasUndo: () => boolean;
+    canCanvasRedo: () => boolean;
+    goToVariation: (index: number) => void;
+
+    // Prompt History (for editing tools)
     undo: () => void;
     redo: () => void;
     canUndo: () => boolean;
@@ -119,6 +129,7 @@ const initialState = {
     isExtracting: false,
     isGenerating: false,
     extractionProgress: 0,
+    currentVariationIndex: -1, // -1 = original image, 0+ = variation index
     history: [],
     historyIndex: -1,
     maxHistoryLength: 15, // Reduced from 50 to optimize memory with deep clones
@@ -178,6 +189,10 @@ export const useTemplateStore = create<TemplateState>()(
                     setTemplate: (template) => {
                         set((state) => {
                             state.template = template;
+                            // Initialize canvas index to latest variation (or -1 if none)
+                            state.currentVariationIndex = template.variations.length > 0
+                                ? template.variations.length - 1
+                                : -1;
                             // Initialize history with first state
                             state.history = [{
                                 prompt: deepClone(template.structured_prompt),
@@ -291,6 +306,8 @@ export const useTemplateStore = create<TemplateState>()(
                             set((state) => {
                                 if (state.template) {
                                     state.template.variations.push(variation);
+                                    // Set canvas to show the new variation
+                                    state.currentVariationIndex = state.template.variations.length - 1;
                                     console.log('[generateVariation] Updated variations count:', state.template.variations.length);
                                 }
                             });
@@ -319,13 +336,54 @@ export const useTemplateStore = create<TemplateState>()(
                         set((state) => {
                             if (state.template) {
                                 state.template.variations.push(variation);
+                                state.currentVariationIndex = state.template.variations.length - 1;
                                 state.template.updated_at = new Date();
                             }
                         });
                     },
 
                     // ==================================================================
-                    // HISTORY MANAGEMENT
+                    // CANVAS HISTORY (Variation Navigation)
+                    // ==================================================================
+
+                    canvasUndo: () => {
+                        const { currentVariationIndex } = get();
+                        // Can go back if we're not already at the original (-1)
+                        if (currentVariationIndex > -1) {
+                            set({ currentVariationIndex: currentVariationIndex - 1 });
+                        }
+                    },
+
+                    canvasRedo: () => {
+                        const { currentVariationIndex, template } = get();
+                        if (!template) return;
+                        // Can go forward if we're not at the latest variation
+                        const maxIndex = template.variations.length - 1;
+                        if (currentVariationIndex < maxIndex) {
+                            set({ currentVariationIndex: currentVariationIndex + 1 });
+                        }
+                    },
+
+                    canCanvasUndo: () => {
+                        return get().currentVariationIndex > -1;
+                    },
+
+                    canCanvasRedo: () => {
+                        const { currentVariationIndex, template } = get();
+                        if (!template) return false;
+                        return currentVariationIndex < template.variations.length - 1;
+                    },
+
+                    goToVariation: (index: number) => {
+                        const { template } = get();
+                        if (!template) return;
+                        // Clamp index to valid range: -1 to variations.length - 1
+                        const clampedIndex = Math.max(-1, Math.min(index, template.variations.length - 1));
+                        set({ currentVariationIndex: clampedIndex });
+                    },
+
+                    // ==================================================================
+                    // PROMPT HISTORY (for editing tools)
                     // ==================================================================
 
                     undo: () => {
@@ -456,6 +514,7 @@ export const useTemplateStore = create<TemplateState>()(
                 // Only persist template, not transient state
                 partialize: (state) => ({
                     template: state.template,
+                    currentVariationIndex: state.currentVariationIndex,
                     history: state.history,
                     historyIndex: state.historyIndex,
                 }),
@@ -496,20 +555,23 @@ useTemplateStore.subscribe(
 // ============================================================================
 
 export function useTemplateKeyboardShortcuts() {
-    const { undo, redo, canUndo, canRedo, saveTemplate } = useTemplateStore();
+    const {
+        canvasUndo, canvasRedo, canCanvasUndo, canCanvasRedo,
+        saveTemplate
+    } = useTemplateStore();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Cmd/Ctrl + Z: Undo
+            // Cmd/Ctrl + Z: Canvas Undo (go to previous variation)
             if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
                 e.preventDefault();
-                if (canUndo()) undo();
+                if (canCanvasUndo()) canvasUndo();
             }
 
-            // Cmd/Ctrl + Shift + Z: Redo
+            // Cmd/Ctrl + Shift + Z: Canvas Redo (go to next variation)
             if ((e.metaKey || e.ctrlKey) && e.key === 'z' && e.shiftKey) {
                 e.preventDefault();
-                if (canRedo()) redo();
+                if (canCanvasRedo()) canvasRedo();
             }
 
             // Cmd/Ctrl + S: Save
@@ -521,7 +583,7 @@ export function useTemplateKeyboardShortcuts() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [undo, redo, canUndo, canRedo, saveTemplate]);
+    }, [canvasUndo, canvasRedo, canCanvasUndo, canCanvasRedo, saveTemplate]);
 }
 
 // ============================================================================

@@ -7,16 +7,19 @@ import { useState, useEffect } from 'react';
 import { ImageOff } from 'lucide-react';
 
 export function Canvas() {
-    const { template } = useTemplateStore();
+    const { template, currentVariationIndex } = useTemplateStore();
     const optimisticState = useOptimisticGeneration();
     const [imageError, setImageError] = useState(false);
 
-    // Determine which image to show:
-    // 1. Latest variation
-    // 2. Original image
+    // Determine which image to show based on currentVariationIndex:
+    // -1 = original image
+    // 0+ = variation at that index
     const variations = template?.variations || [];
-    const latestVariation = variations[variations.length - 1];
-    const displayImage = latestVariation?.image_url || template?.original_image_url;
+    const currentVariation = currentVariationIndex >= 0 ? variations[currentVariationIndex] : null;
+    const displayImage = currentVariation?.image_url || template?.original_image_url;
+
+    // Unique key for forcing canvas re-render on variation change
+    const canvasKey = currentVariation?.id || 'original';
 
     // Reset error state when the displayed image changes
     useEffect(() => {
@@ -35,8 +38,11 @@ export function Canvas() {
                 }}
             />
 
-            {/* Image Container */}
-            <div className="relative w-full h-full max-w-4xl max-h-[80vh] shadow-2xl rounded-lg overflow-hidden transition-transform duration-500 ease-out">
+            {/* Image Container - keyed to force fresh render on variation change */}
+            <div
+                key={canvasKey}
+                className="relative w-full h-full max-w-4xl max-h-[80vh] shadow-2xl rounded-lg overflow-hidden transition-transform duration-500 ease-out"
+            >
                 {displayImage && !imageError ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
